@@ -569,11 +569,16 @@ export default function RootPage() {
 
       {/* ── FOOTER ── */}
       <footer className="relative z-10 pt-2 pb-5 desk:py-5 px-5 sm:px-8 desk:px-16 w-full max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-xs text-slate-400 text-center sm:text-left">
-        <div className="leading-relaxed">
-          <span>© {new Date().getFullYear()} Go Speedy</span>
-          <span className="hidden sm:inline"> • </span>
-          <br className="sm:hidden" />
-          <span>Electric Mobility Rental &amp; Finance</span>
+        <div className="leading-relaxed space-y-0.5">
+          <div>
+            <span>© {new Date().getFullYear()} Go Speedy</span>
+            <span className="hidden sm:inline"> • </span>
+            <br className="sm:hidden" />
+            <span>Electric Mobility Rental &amp; Finance</span>
+          </div>
+          <div className="text-[11px] text-slate-600">
+            Developed by Yana Malhotra, Harsh Raj Singh, Sumit Tripathi &amp; Sanchit Aggarwal
+          </div>
         </div>
         <div className="flex items-center gap-2 text-slate-400 hover:text-white cursor-pointer transition-colors">
           <span>Need Help?</span>
