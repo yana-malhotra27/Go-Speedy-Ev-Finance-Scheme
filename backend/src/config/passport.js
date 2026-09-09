@@ -9,11 +9,7 @@ const authService = require('../modules/auth/auth.service');
  * OAuth dance itself — no session serialisation needed.
  */
 if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
-  const callbackURL =
-    env.GOOGLE_CALLBACK_URL ||
-    (env.BACKEND_URL
-      ? `${env.BACKEND_URL.replace(/\/$/, '')}/api/auth/google/callback`
-      : `http://localhost:${env.PORT || 5000}/api/auth/google/callback`);
+  const callbackURL = env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback';
 
   passport.use(
     new GoogleStrategy(
@@ -21,6 +17,7 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
         clientID: env.GOOGLE_CLIENT_ID,
         clientSecret: env.GOOGLE_CLIENT_SECRET,
         callbackURL,
+        proxy: true, // Trusts the Vercel reverse proxy to build the correct absolute URL
         scope: ['profile', 'email'],
       },
       async (accessToken, refreshToken, profile, done) => {
