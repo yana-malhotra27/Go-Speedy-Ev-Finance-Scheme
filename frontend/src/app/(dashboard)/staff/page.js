@@ -9,6 +9,7 @@ import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import Modal from '../../../components/ui/Modal';
 import Badge from '../../../components/ui/Badge';
+import Pagination from '../../../components/ui/Pagination';
 import ProtectedRoute from '../../../components/layout/ProtectedRoute';
 import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/authStore';
@@ -25,6 +26,9 @@ export default function StaffPage() {
   const { user: currentUser } = useAuthStore();
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   // Add Staff Modal
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -53,14 +57,16 @@ export default function StaffPage() {
 
   useEffect(() => {
     fetchStaff();
-  }, []);
+  }, [page]);
 
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/staff');
+      const res = await api.get(`/api/staff?page=${page}&limit=15`);
       if (res.data?.success) {
         setStaffList(res.data.data || []);
+        setTotalPages(res.data.pagination?.totalPages || 1);
+        setTotalRecords(res.data.pagination?.totalItems || 0);
       }
     } catch (err) {
       console.error('Failed to load staff:', err);
@@ -311,6 +317,13 @@ export default function StaffPage() {
           data={staffList}
           loading={loading}
           emptyText="No staff members registered."
+        />
+
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={totalRecords}
+          onPageChange={setPage}
         />
       </div>
 

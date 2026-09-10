@@ -1,16 +1,22 @@
 const supabase = require('../../config/db');
 const bcrypt = require('bcryptjs');
 const { buildDiff } = require('../../utils/auditLog');
+const { getPaginationOptions, getPaginationMeta } = require('../../utils/pagination');
 
 class StaffService {
-  async getAllStaff() {
-    const { data, error } = await supabase
+  async getAllStaff(query = {}) {
+    const { page, limit, offset } = getPaginationOptions(query);
+
+    const { data, count, error } = await supabase
       .from('users')
-      .select('id, name, phone, email, role, is_active, created_at, updated_at')
-      .order('created_at', { ascending: false });
+      .select('id, name, phone, email, role, is_active, created_at, updated_at', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) throw error;
-    return data;
+
+    const meta = getPaginationMeta(count, page, limit);
+    return { data, meta };
   }
 
   async createStaff({ name, phone, email, password, role }, createdBy) {

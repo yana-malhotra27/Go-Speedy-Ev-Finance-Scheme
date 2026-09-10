@@ -150,7 +150,7 @@ export default function SustainabilityBanner() {
         </div>
 
         {/* Right Side: Clean Mobility + Subtitle + Small Arrow */}
-        <div className="flex items-center gap-3 self-end sm:self-center shrink-0 group">
+        <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
           <div className="text-right">
             <p className="text-xs md:text-[13px] font-bold text-slate-900 dark:text-white tracking-tight leading-none">
               Clean Mobility
@@ -158,9 +158,6 @@ export default function SustainabilityBanner() {
             <p className="text-[10px] md:text-[11px] text-slate-400 dark:text-slate-500 mt-1 leading-none">
               Brighter Futures
             </p>
-          </div>
-          <div className="h-7 w-7 rounded-lg bg-slate-100/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 group-hover:border-emerald-300 dark:group-hover:border-emerald-500/30 transition-smooth shrink-0">
-            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
           </div>
         </div>
       </div>

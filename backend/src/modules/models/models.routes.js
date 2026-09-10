@@ -32,17 +32,39 @@ const validateBody = (schema) => (req, res, next) => {
 
 /**
  * @openapi
- * /api/models:
+ * /api/models/dropdown:
  *   get:
- *     summary: List all EV models
+ *     summary: List all EV models for dropdown selects (no pagination)
  *     tags: [Models]
  *     security:
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: List of models
+ *         description: Full list of models
+ */
+router.get('/dropdown', modelsController.getAllForDropdown.bind(modelsController));
+
+/**
+ * @openapi
+ * /api/models:
+ *   get:
+ *     summary: List EV models (paginated)
+ *     tags: [Models]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Paginated list of models
  */
 router.get('/', modelsController.getAll.bind(modelsController));
+
 
 /**
  * @openapi

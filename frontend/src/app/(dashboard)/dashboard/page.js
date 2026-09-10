@@ -56,7 +56,7 @@ function AdminDashboard() {
       setLoading(true);
 
       // Fetch Models for stock
-      const modelsRes = await api.get('/api/models');
+      const modelsRes = await api.get('/api/models/dropdown');
       const models = modelsRes.data?.data || [];
       const totalStock = models.reduce((sum, m) => sum + (m.stock_count || 0), 0);
 

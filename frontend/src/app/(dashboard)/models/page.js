@@ -8,12 +8,16 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Modal from '../../../components/ui/Modal';
 import Badge from '../../../components/ui/Badge';
+import Pagination from '../../../components/ui/Pagination';
 import api from '../../../lib/api';
 import { formatCurrency, formatDate } from '../../../lib/constants';
 
 export default function ModelsPage() {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -27,14 +31,16 @@ export default function ModelsPage() {
 
   useEffect(() => {
     fetchModels();
-  }, []);
+  }, [page]);
 
   const fetchModels = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/models');
+      const res = await api.get(`/api/models?page=${page}&limit=15`);
       if (res.data?.success) {
         setModels(res.data.data || []);
+        setTotalPages(res.data.pagination?.totalPages || 1);
+        setTotalRecords(res.data.pagination?.totalItems || 0);
       }
     } catch (err) {
       console.error('Failed to load models:', err);
@@ -149,6 +155,13 @@ export default function ModelsPage() {
           data={models}
           loading={loading}
           emptyText="No EV models registered yet. Click 'Add New EV Model' to add inventory."
+        />
+
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={totalRecords}
+          onPageChange={setPage}
         />
       </div>
 

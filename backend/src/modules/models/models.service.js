@@ -1,11 +1,28 @@
 const supabase = require('../../config/db');
+const { getPaginationOptions, getPaginationMeta } = require('../../utils/pagination');
 
 class ModelsService {
-  async getAllModels() {
+  async getAllModels(query = {}) {
+    const { page, limit, offset } = getPaginationOptions(query);
+
+    const { data, count, error } = await supabase
+      .from('ev_models')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    const meta = getPaginationMeta(count, page, limit);
+    return { data, meta };
+  }
+
+  // Lightweight list for dropdowns — returns all models without pagination
+  async getAllModelsForDropdown() {
     const { data, error } = await supabase
       .from('ev_models')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('id, name, company, total_price, stock_count')
+      .order('name', { ascending: true });
 
     if (error) throw error;
     return data;
