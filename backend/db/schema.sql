@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
   oauth_id                 TEXT,                         -- Google profile ID
   role                     TEXT NOT NULL
                              CHECK (role IN ('admin', 'staff')),
+  ward_area                TEXT,
   is_active                BOOLEAN NOT NULL DEFAULT true,
   refresh_token_hash       TEXT,                         -- bcrypt hash; NULL = logged out
   refresh_token_expires_at TIMESTAMPTZ,

@@ -41,6 +41,7 @@ export default function StaffPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('staff');
+  const [wardArea, setWardArea] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -50,6 +51,7 @@ export default function StaffPage() {
   const [editPhone, setEditPhone] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editRole, setEditRole] = useState('staff');
+  const [editWardArea, setEditWardArea] = useState('');
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -104,6 +106,7 @@ export default function StaffPage() {
         email: email.trim() || null,
         password,
         role,
+        ward_area: wardArea.trim() || null,
       });
 
       if (res.data?.success) {
@@ -112,6 +115,7 @@ export default function StaffPage() {
         setPhone('');
         setEmail('');
         setPassword('');
+        setWardArea('');
         toast.success('Staff member registered.');
         fetchStaff();
       }
@@ -128,6 +132,7 @@ export default function StaffPage() {
     setEditPhone(staffMember.phone || '');
     setEditEmail(staffMember.email || '');
     setEditRole(staffMember.role || 'staff');
+    setEditWardArea(staffMember.ward_area || '');
     setEditError('');
   };
 
@@ -148,6 +153,7 @@ export default function StaffPage() {
         name: editName.trim(),
         phone: editPhone.trim(),
         email: editEmail.trim() || null,
+        ward_area: editWardArea.trim() || null,
       };
       // Omit role entirely when self-editing — the field is locked in the UI too,
       // and the backend also rejects a self role-change as a second line of defense.
@@ -242,6 +248,11 @@ export default function StaffPage() {
       header: 'System Role',
       key: 'role',
       render: (row) => <Badge status={row.role} size="sm" />,
+    },
+    {
+      header: 'Ward / Area',
+      key: 'ward_area',
+      render: (row) => <span className="font-semibold text-slate-700 dark:text-slate-300">{row.ward_area || '—'}</span>,
     },
     {
       header: 'Status',
@@ -420,6 +431,13 @@ export default function StaffPage() {
             options={ROLE_OPTIONS}
           />
 
+          <Input
+            label="Ward / Area"
+            placeholder="e.g. Delhi Central"
+            value={wardArea}
+            onChange={(e) => setWardArea(e.target.value)}
+          />
+
           <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
             <Button
               variant="outline"
@@ -493,6 +511,13 @@ export default function StaffPage() {
               </p>
             )}
           </div>
+
+          <Input
+            label="Ward / Area"
+            placeholder="e.g. Delhi Central"
+            value={editWardArea}
+            onChange={(e) => setEditWardArea(e.target.value)}
+          />
 
           <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
             <Button

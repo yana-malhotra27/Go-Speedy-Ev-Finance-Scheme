@@ -28,6 +28,7 @@ const createStaffSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   role: z.enum(['admin', 'staff']),
+  ward_area: z.string().optional(),
 });
 
 const updateStaffSchema = z.object({
@@ -35,6 +36,7 @@ const updateStaffSchema = z.object({
   phone: z.string().min(10).optional(),
   email: emailSchema,
   role: z.enum(['admin', 'staff']).optional(),
+  ward_area: z.string().optional(),
 });
 
 const validateBody = (schema) => (req, res, next) => {

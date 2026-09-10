@@ -24,7 +24,7 @@ class StaffController {
         action: 'CREATE_STAFF',
         entityType: 'users',
         entityId: data.id,
-        changes: { name: data.name, phone: data.phone, email: data.email, role: data.role },
+        changes: { name: data.name, phone: data.phone, email: data.email, role: data.role, ward_area: data.ward_area },
         ip: clientIp(req),
       });
       return successResponse(res, 201, data, 'Staff created successfully');

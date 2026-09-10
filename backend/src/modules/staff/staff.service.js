@@ -10,7 +10,7 @@ class StaffService {
 
     let queryBuilder = supabase
       .from('users')
-      .select('id, name, phone, email, role, is_active, created_at, updated_at', { count: 'exact' })
+      .select('id, name, phone, email, role, ward_area, is_active, created_at, updated_at', { count: 'exact' })
       .order('created_at', { ascending: false });
 
     if (query.search) {
@@ -31,7 +31,7 @@ class StaffService {
     return { data, meta };
   }
 
-  async createStaff({ name, phone, email, password, role }, createdBy) {
+  async createStaff({ name, phone, email, password, role, ward_area }, createdBy) {
     const password_hash = await bcrypt.hash(password, 10);
     
     const { data, error } = await supabase
@@ -42,10 +42,11 @@ class StaffService {
         email: email || null,
         password_hash,
         role,
+        ward_area,
         is_active: true,
         created_by: createdBy
       }])
-      .select('id, name, phone, email, role, is_active, created_at')
+      .select('id, name, phone, email, role, ward_area, is_active, created_at')
       .single();
 
     if (error) {
@@ -68,7 +69,7 @@ class StaffService {
     // diff instead of just dumping the new request body.
     const { data: before, error: fetchError } = await supabase
       .from('users')
-      .select('name, phone, email, role, is_active')
+      .select('name, phone, email, role, ward_area, is_active')
       .eq('id', id)
       .single();
     if (fetchError) throw fetchError;
@@ -77,7 +78,7 @@ class StaffService {
       .from('users')
       .update(updates)
       .eq('id', id)
-      .select('id, name, phone, email, role, is_active')
+      .select('id, name, phone, email, role, ward_area, is_active')
       .single();
 
     if (error) {
