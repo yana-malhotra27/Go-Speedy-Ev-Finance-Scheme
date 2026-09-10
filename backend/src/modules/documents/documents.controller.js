@@ -29,7 +29,8 @@ class DocumentsController {
       
       const allowedDocTypes = [
         'aadhar_path', 'pan_path', 'cheque_path', 
-        'electricity_bill_path', 'tenant_photo_path', 'scooty_photo_path'
+        'electricity_bill_path', 'tenant_photo_path', 'scooty_photo_path',
+        'rent_agreement_path'
       ];
 
       if (!allowedDocTypes.includes(doc_type)) {

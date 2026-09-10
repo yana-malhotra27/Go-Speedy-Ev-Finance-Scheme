@@ -45,6 +45,7 @@ const createRentalSchema = z.object({
   electricity_bill_path: z.string().optional(),
   tenant_photo_path: z.string().optional(),
   scooty_photo_path: z.string().optional(),
+  rent_agreement_path: z.string().optional(),
 }).passthrough();
 
 const updateRentalSchema = z.object({}).passthrough();

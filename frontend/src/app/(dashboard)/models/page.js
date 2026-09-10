@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bike, Plus, AlertCircle } from 'lucide-react';
+import { Bike, Plus, AlertCircle, Edit2 } from 'lucide-react';
 import Header from '../../../components/layout/Header';
 import Table from '../../../components/ui/Table';
 import Button from '../../../components/ui/Button';
@@ -22,6 +22,7 @@ export default function ModelsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingModelId, setEditingModelId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,7 +60,27 @@ export default function ModelsPage() {
     }
   };
 
-  const handleCreateModel = async (e) => {
+  const handleEditClick = (model) => {
+    setEditingModelId(model.id);
+    setName(model.name);
+    setCompany(model.company);
+    setWard(model.ward);
+    setTotalPrice(model.total_price.toString());
+    setStockCount(model.stock_count.toString());
+    setIsAddModalOpen(true);
+  };
+
+  const handleOpenAddModal = () => {
+    setEditingModelId(null);
+    setName('');
+    setCompany('');
+    setWard('Delhi Central');
+    setTotalPrice('80000');
+    setStockCount('5');
+    setIsAddModalOpen(true);
+  };
+
+  const handleSubmitModel = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -70,22 +91,30 @@ export default function ModelsPage() {
 
     try {
       setIsSubmitting(true);
-      const res = await api.post('/api/models', {
+      const payload = {
         name: name.trim(),
         company: company.trim(),
         ward: ward.trim(),
         total_price: Number(totalPrice),
         stock_count: Number(stockCount),
-      });
+      };
+
+      let res;
+      if (editingModelId) {
+        res = await api.patch(`/api/models/${editingModelId}`, payload);
+      } else {
+        res = await api.post('/api/models', payload);
+      }
 
       if (res.data?.success) {
         setIsAddModalOpen(false);
+        setEditingModelId(null);
         setName('');
         setCompany('');
         fetchModels();
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create EV model');
+      setError(err.response?.data?.message || `Failed to ${editingModelId ? 'update' : 'create'} EV model`);
     } finally {
       setIsSubmitting(false);
     }
@@ -140,6 +169,19 @@ export default function ModelsPage() {
         </div>
       ),
     },
+    {
+      header: 'Actions',
+      key: 'actions',
+      render: (row) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={Edit2}
+          onClick={() => handleEditClick(row)}
+          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        />
+      ),
+    },
   ];
 
   return (
@@ -152,7 +194,7 @@ export default function ModelsPage() {
             variant="primary"
             size="sm"
             icon={Plus}
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
           >
             Add New EV Model
           </Button>
@@ -188,14 +230,14 @@ export default function ModelsPage() {
         />
       </div>
 
-      {/* Add Model Modal */}
+      {/* Add/Edit Model Modal */}
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="Register New EV Model"
-        subtitle="Add a new electric scooter model to available fleet inventory"
+        title={editingModelId ? "Edit EV Model" : "Register New EV Model"}
+        subtitle={editingModelId ? "Update existing model details" : "Add a new electric scooter model to available fleet inventory"}
       >
-        <form onSubmit={handleCreateModel} className="space-y-4">
+        <form onSubmit={handleSubmitModel} className="space-y-4">
           {error && (
             <div className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -262,7 +304,7 @@ export default function ModelsPage() {
               size="md"
               loading={isSubmitting}
             >
-              Save Model
+              {editingModelId ? 'Update Model' : 'Save Model'}
             </Button>
           </div>
         </form>

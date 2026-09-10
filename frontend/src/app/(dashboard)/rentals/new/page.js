@@ -83,6 +83,7 @@ export default function NewRentalWizardPage() {
     electricity_bill_path: '',
     tenant_photo_path: '',
     scooty_photo_path: '',
+    rent_agreement_path: '',
 
     // Step 4: Scooty Hardware
     chassis_no: '',
@@ -272,6 +273,7 @@ export default function NewRentalWizardPage() {
       { key: 'electricity_bill_path', label: 'Electricity Bill Photo' },
       { key: 'tenant_photo_path', label: 'Tenant Profile Photo' },
       { key: 'scooty_photo_path', label: 'Scooty Handover Photo' },
+      { key: 'rent_agreement_path', label: 'Rent Agreement Photo' },
     ];
 
     const missing = docLabels
@@ -563,6 +565,13 @@ export default function NewRentalWizardPage() {
                   docType="scooty_photo_path"
                   currentPath={formData.scooty_photo_path}
                   onUploaded={(path) => updateField('scooty_photo_path', path)}
+                />
+
+                <FileUpload
+                  label="Rent Agreement"
+                  docType="rent_agreement_path"
+                  currentPath={formData.rent_agreement_path}
+                  onUploaded={(path) => updateField('rent_agreement_path', path)}
                 />
               </div>
             </div>
