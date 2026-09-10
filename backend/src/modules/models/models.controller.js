@@ -4,7 +4,17 @@ const { successResponse, errorResponse } = require('../../utils/response');
 class ModelsController {
   async getAll(req, res) {
     try {
-      const data = await modelsService.getAllModels();
+      const { data, meta } = await modelsService.getAllModels(req.query);
+      return successResponse(res, 200, data, 'Models retrieved successfully', meta);
+    } catch (error) {
+      console.error(error);
+      return errorResponse(res, 500, 'Internal Server Error');
+    }
+  }
+
+  async getAllForDropdown(req, res) {
+    try {
+      const data = await modelsService.getAllModelsForDropdown();
       return successResponse(res, 200, data, 'Models retrieved successfully');
     } catch (error) {
       console.error(error);

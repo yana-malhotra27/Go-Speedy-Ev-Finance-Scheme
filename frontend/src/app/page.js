@@ -84,7 +84,7 @@ export default function RootPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [showVideo, setShowVideo] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
 
   // Forgot Password modal state
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
@@ -173,11 +173,6 @@ export default function RootPage() {
   };
 
   useEffect(() => {
-    const hasPlayed = sessionStorage.getItem('introVideoPlayed');
-    if (hasPlayed) {
-      setShowVideo(false);
-    }
-
     // Check for OAuth error query params (e.g. ?error=account_deactivated)
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -195,10 +190,7 @@ export default function RootPage() {
     }
   }, []);
 
-  const handleVideoEnd = () => {
-    setShowVideo(false);
-    sessionStorage.setItem('introVideoPlayed', 'true');
-  };
+
 
   useEffect(() => {
     checkAuth().then((u) => {
@@ -263,26 +255,7 @@ export default function RootPage() {
   };
 
 
-  if (showVideo) {
-    return (
-      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center overflow-hidden">
-        <video
-          src="/generate_a_video_in_which_the (1).mp4"
-          autoPlay
-          muted
-          playsInline
-          onEnded={handleVideoEnd}
-          className="w-full h-full object-cover"
-        />
-        <button
-          onClick={handleVideoEnd}
-          className="absolute top-6 right-6 z-50 text-white/70 hover:text-white px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all font-medium text-sm cursor-pointer"
-        >
-          Skip Intro
-        </button>
-      </div>
-    );
-  }
+
 
   return (
     <div className="relative min-h-screen bg-[#070c18] text-white flex flex-col overflow-x-hidden select-none">
@@ -569,11 +542,16 @@ export default function RootPage() {
 
       {/* ── FOOTER ── */}
       <footer className="relative z-10 pt-2 pb-5 desk:py-5 px-5 sm:px-8 desk:px-16 w-full max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-xs text-slate-400 text-center sm:text-left">
-        <div className="leading-relaxed">
-          <span>© {new Date().getFullYear()} Go Speedy</span>
-          <span className="hidden sm:inline"> • </span>
-          <br className="sm:hidden" />
-          <span>Electric Mobility Rental &amp; Finance</span>
+        <div className="leading-relaxed space-y-0.5">
+          <div>
+            <span>© {new Date().getFullYear()} Go Speedy</span>
+            <span className="hidden sm:inline"> • </span>
+            <br className="sm:hidden" />
+            <span>Electric Mobility Rental &amp; Finance</span>
+          </div>
+          <div className="text-[11px] text-slate-600">
+            Developed by Yana Malhotra, Harsh Raj Singh, Sumit Tripathi &amp; Sanchit Aggarwal
+          </div>
         </div>
         <div className="flex items-center gap-2 text-slate-400 hover:text-white cursor-pointer transition-colors">
           <span>Need Help?</span>

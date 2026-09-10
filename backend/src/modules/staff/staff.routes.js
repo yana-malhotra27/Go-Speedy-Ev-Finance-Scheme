@@ -4,7 +4,6 @@ const staffController = require('./staff.controller');
 const requireAuth = require('../../middleware/auth');
 const { requireAdmin } = require('../../middleware/roleGuard');
 const requestLogger = require('../../middleware/requestLogger');
-
 const router = express.Router();
 
 // Apply auth and admin guard to all staff routes

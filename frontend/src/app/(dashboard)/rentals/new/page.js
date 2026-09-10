@@ -127,7 +127,7 @@ export default function NewRentalWizardPage() {
 
   // Load models & draft
   useEffect(() => {
-    api.get('/api/models').then((res) => {
+    api.get('/api/models/dropdown').then((res) => {
       if (res.data?.success) {
         setModels(res.data.data || []);
       }

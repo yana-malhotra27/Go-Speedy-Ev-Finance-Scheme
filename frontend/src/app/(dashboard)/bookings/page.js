@@ -62,7 +62,7 @@ export default function BookingsPage() {
 
       const [bookingsRes, modelsRes] = await Promise.all([
         api.get(bookingsQuery),
-        api.get('/api/models'),
+        api.get('/api/models/dropdown'),
       ]);
 
       if (bookingsRes.data?.success) {

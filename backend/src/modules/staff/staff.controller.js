@@ -7,8 +7,8 @@ const clientIp = (req) => req.ip || req.headers['x-forwarded-for'];
 class StaffController {
   async getAll(req, res) {
     try {
-      const data = await staffService.getAllStaff();
-      return successResponse(res, 200, data, 'Staff retrieved successfully');
+      const { data, meta } = await staffService.getAllStaff(req.query);
+      return successResponse(res, 200, data, 'Staff retrieved successfully', meta);
     } catch (error) {
       console.error(error);
       return errorResponse(res, 500, 'Internal Server Error');

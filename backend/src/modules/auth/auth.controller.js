@@ -99,28 +99,31 @@ class AuthController {
 
   _setCookies(res, accessToken, refreshToken, userId) {
     const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOpts = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      cookieOpts.domain = process.env.COOKIE_DOMAIN;
+    }
     
     // Access token - 15 mins
     res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'lax',
+      ...cookieOpts,
       maxAge: 15 * 60 * 1000, 
     });
 
     // Refresh token - 7 days
     res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'lax',
+      ...cookieOpts,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     // User ID (for finding the correct refresh hash later) - 7 days
     res.cookie('user_id', userId, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'lax',
+      ...cookieOpts,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }

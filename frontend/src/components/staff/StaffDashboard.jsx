@@ -66,7 +66,7 @@ export default function StaffDashboard() {
       setLoading(true);
 
       // 1. Fetch EV Models
-      const modelsRes = await api.get('/api/models');
+      const modelsRes = await api.get('/api/models/dropdown');
       const models = modelsRes.data?.data || [];
       const totalAvailable = models.reduce((sum, m) => sum + (m.stock_count || 0), 0);
       setEvModels(models);

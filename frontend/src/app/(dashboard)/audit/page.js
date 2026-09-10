@@ -183,11 +183,10 @@ export default function AuditPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
-  // Track only rows the admin has *manually collapsed* — everything else
-  // shows its full change diff open by default, no click required.
-  const [collapsedIds, setCollapsedIds] = useState(() => new Set());
+  // Track only rows the admin has *manually expanded* — everything starts collapsed.
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
   const toggleRow = (id) => {
-    setCollapsedIds(prev => {
+    setExpandedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
@@ -202,8 +201,8 @@ export default function AuditPage() {
       const res = await api.get(`/api/audit?page=${p}&limit=20`);
       if (res.data?.success) {
         setLogs(res.data.data || []);
-        setTotalPages(res.data.meta?.totalPages || 1);
-        setTotalRecords(res.data.meta?.totalRecords || 0);
+        setTotalPages(res.data.pagination?.totalPages || 1);
+        setTotalRecords(res.data.pagination?.totalItems || 0);
       }
     } catch (err) {
       console.error('Failed to load audit logs:', err);
@@ -265,7 +264,7 @@ export default function AuditPage() {
             </span>
             <ChangeDiff
               changes={row.changes}
-              isExpanded={!collapsedIds.has(row.id)}
+              isExpanded={expandedIds.has(row.id)}
               onToggle={() => toggleRow(row.id)}
               targetName={targetName}
             />
