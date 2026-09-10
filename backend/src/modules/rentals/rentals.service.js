@@ -139,6 +139,17 @@ class RentalsService {
     const expectedEndDate = new Date(startDate);
     expectedEndDate.setMonth(expectedEndDate.getMonth() + totalMonths);
 
+    // Ensure NOT NULL fields are never null for direct_purchase
+    if (tenantData.status === 'direct_purchase') {
+      tenantData.installment_daily_rate = 0;
+      tenantData.installment_frequency = tenantData.installment_frequency || 'daily';
+      tenantData.downpayment_paid = tenantData.downpayment_paid ?? 0;
+      tenantData.booking_amount = tenantData.booking_amount ?? 0;
+    } else {
+      tenantData.installment_daily_rate = tenantData.installment_daily_rate ?? 250;
+      tenantData.installment_frequency = tenantData.installment_frequency || 'daily';
+    }
+
     // 4. Insert Tenant
     try {
       const { data, error } = await supabase
@@ -209,8 +220,10 @@ class RentalsService {
       .single();
 
     if (fetchError) throw fetchError;
-    if (tenant.status === 'cancelled') throw new Error('Rental is already cancelled');
-    if (tenant.status !== 'rented') throw new Error('Only active rentals can be cancelled');
+    if (tenant.status === 'cancelled') throw new Error('This contract is already cancelled');
+    if (tenant.status !== 'rented' && tenant.status !== 'direct_purchase') {
+      throw new Error('Only active rentals or direct purchases can be cancelled');
+    }
 
     // 1. Update status
     const { error: cancelError } = await supabase

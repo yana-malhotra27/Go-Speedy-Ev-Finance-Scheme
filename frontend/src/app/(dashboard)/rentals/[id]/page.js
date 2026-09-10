@@ -39,6 +39,9 @@ import {
   formatCurrency,
   formatDate,
   PAYMENT_MODES,
+  REFERENCE_CATEGORIES,
+  HP_FINANCERS,
+  RTO_TYPES,
 } from '../../../../lib/constants';
 
 export default function TenantDetailPage() {
@@ -201,7 +204,14 @@ export default function TenantDetailPage() {
   const handleSaveChanges = async () => {
     try {
       setIsSaving(true);
-      const res = await api.patch(`/api/rentals/${tenantId}`, editData);
+      const payload = {
+        ...editData,
+        references: (editData.references || []).map(({ customCategory, ...r }) => ({
+          ...r,
+          category: r.category === 'other' ? (customCategory || 'Other') : r.category,
+        })),
+      };
+      const res = await api.patch(`/api/rentals/${tenantId}`, payload);
       if (res.data?.success) {
         setIsEditMode(false);
         toast.success('Changes saved.');
@@ -488,10 +498,11 @@ export default function TenantDetailPage() {
 
               <div>
                 {isEditMode ? (
-                  <Input
+                  <Select
                     label="RTO Classification"
                     value={editData.rto_type}
                     onChange={(e) => setEditData({ ...editData, rto_type: e.target.value })}
+                    options={RTO_TYPES}
                   />
                 ) : (
                   <>
@@ -503,10 +514,11 @@ export default function TenantDetailPage() {
 
               <div>
                 {isEditMode ? (
-                  <Input
+                  <Select
                     label="HP Financer"
                     value={editData.hp_financer}
                     onChange={(e) => setEditData({ ...editData, hp_financer: e.target.value })}
+                    options={HP_FINANCERS}
                   />
                 ) : (
                   <>
@@ -714,12 +726,15 @@ export default function TenantDetailPage() {
                           <Select
                             value={r.category || ''}
                             onChange={(e) => updateReference(i, 'category', e.target.value)}
-                            options={[
-                              { value: 'relative', label: 'Relative' },
-                              { value: 'friend', label: 'Friend' },
-                              { value: 'colleague', label: 'Colleague' }
-                            ]}
+                            options={REFERENCE_CATEGORIES}
                           />
+                          {r.category === 'other' && (
+                            <Input
+                              placeholder="Please specify category"
+                              value={r.customCategory || ''}
+                              onChange={(e) => updateReference(i, 'customCategory', e.target.value)}
+                            />
+                          )}
                         </div>
                       </div>
                     ))}
@@ -968,16 +983,16 @@ export default function TenantDetailPage() {
         </form>
       </Modal>
 
-      {/* Cancel Rental Confirmation Modal */}
+      {/* Cancel Rental/Purchase Confirmation Modal */}
       <Modal
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
-        title="Confirm Rental Cancellation"
-        subtitle="This action restores vehicle stock and closes the active contract"
+        title={tenant.status === 'direct_purchase' ? "Cancel Direct Purchase" : "Confirm Rental Cancellation"}
+        subtitle="This action restores vehicle stock and closes the contract"
       >
         <div className="space-y-4">
           <p className="text-xs text-slate-700 dark:text-slate-300">
-            Are you sure you want to cancel the contract for <span className="font-bold">{tenant.name}</span>?
+            Are you sure you want to cancel the {tenant.status === 'direct_purchase' ? 'purchase' : 'rental'} contract for <span className="font-bold">{tenant.name}</span>?
             The EV model stock will automatically increase by 1 in the inventory.
           </p>
 
@@ -1000,6 +1015,7 @@ export default function TenantDetailPage() {
           </div>
         </div>
       </Modal>
+
 
       {/* View Document Modal */}
       <Modal

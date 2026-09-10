@@ -80,6 +80,30 @@ function formatFieldName(key) {
 function formatValue(val, key) {
   if (val === null || val === undefined) return '—';
   if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+  
+  if (Array.isArray(val)) {
+    if (val.length === 0) return 'None';
+    if (typeof val[0] === 'object' && val[0] !== null) {
+      return (
+        <div className="flex flex-col gap-1 mt-1">
+          {val.map((item, idx) => (
+            <div key={idx} className="bg-white/50 dark:bg-slate-900/30 p-1.5 rounded border border-slate-100 dark:border-white/5">
+              {Object.entries(item)
+                .filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+                .map(([k, v]) => (
+                  <span key={k} className="inline-block mr-3">
+                    <span className="text-slate-400 dark:text-slate-500 capitalize">{k}: </span>
+                    <span className="text-slate-800 dark:text-slate-200">{v}</span>
+                  </span>
+                ))}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return val.join(', ');
+  }
+
   if (typeof val === 'object') return JSON.stringify(val);
   // Try to detect ISO date strings
   if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(val)) {
@@ -137,17 +161,17 @@ function ChangeDiff({ changes, isExpanded, onToggle, targetName }) {
                   </p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {'from' in entry && (
-                      <span className="text-xs bg-red-50 dark:bg-rose-500/15 text-red-600 dark:text-rose-400 border border-red-200 dark:border-rose-500/30 rounded px-2 py-0.5 line-through">
+                      <div className="text-xs bg-red-50 dark:bg-rose-500/15 text-red-600 dark:text-rose-400 border border-red-200 dark:border-rose-500/30 rounded px-2 py-0.5 line-through">
                         {formatValue(entry.from, key)}
-                      </span>
+                      </div>
                     )}
                     {('from' in entry && 'to' in entry) && (
                       <span className="text-slate-400 dark:text-slate-500 text-xs">→</span>
                     )}
                     {'to' in entry && (
-                      <span className="text-xs bg-green-50 dark:bg-emerald-500/15 text-green-700 dark:text-emerald-400 border border-green-200 dark:border-emerald-500/30 rounded px-2 py-0.5 font-semibold">
+                      <div className="text-xs bg-green-50 dark:bg-emerald-500/15 text-green-700 dark:text-emerald-400 border border-green-200 dark:border-emerald-500/30 rounded px-2 py-0.5 font-semibold">
                         {formatValue(entry.to, key)}
-                      </span>
+                      </div>
                     )}
                   </div>
                   {isRoleChange && (
@@ -166,7 +190,7 @@ function ChangeDiff({ changes, isExpanded, onToggle, targetName }) {
                 <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">
                   {formatFieldName(key)}
                 </p>
-                <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">{formatValue(entry, key)}</p>
+                <div className="text-xs text-slate-700 dark:text-slate-300 font-medium">{formatValue(entry, key)}</div>
               </div>
             );
           })}

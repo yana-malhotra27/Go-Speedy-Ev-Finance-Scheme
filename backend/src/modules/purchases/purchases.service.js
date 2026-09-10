@@ -8,11 +8,21 @@ class PurchasesService {
     
     let queryBuilder = supabase
       .from('tenants')
-      .select('*, ev_models(name, company)', { count: 'exact' })
-      .in('status', ['completed', 'direct_purchase']);
+      .select('*, ev_models(name, company)', { count: 'exact' });
+      
+    if (query.status) {
+      // When showing cancelled, we only want cancelled direct purchases
+      queryBuilder = queryBuilder.eq('status', query.status).eq('installment_daily_rate', 0);
+    } else {
+      queryBuilder = queryBuilder.in('status', ['completed', 'direct_purchase']);
+    }
     
     if (query.search) {
       queryBuilder = queryBuilder.or(buildSearchFilter(['name', 'phone'], query.search));
+    }
+
+    if (query.has_pending_docs !== undefined && query.has_pending_docs !== '') {
+      queryBuilder = queryBuilder.eq('has_pending_docs', query.has_pending_docs === 'true');
     }
 
     const { data, count, error } = await queryBuilder

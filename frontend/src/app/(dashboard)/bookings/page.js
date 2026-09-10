@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarCheck, Plus, ArrowRight, XCircle, AlertCircle, Edit } from 'lucide-react';
+import { CalendarCheck, Plus, ArrowRight, XCircle, AlertCircle, Edit, Phone } from 'lucide-react';
 import Header from '../../../components/layout/Header';
 import Table from '../../../components/ui/Table';
 import Button from '../../../components/ui/Button';
@@ -163,7 +163,9 @@ export default function BookingsPage() {
       render: (row) => (
         <div>
           <p className="font-bold text-slate-900 dark:text-white">{row.name}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{row.phone}</p>
+          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+            <Phone className="h-3 w-3" /> {row.phone}
+          </span>
         </div>
       ),
     },

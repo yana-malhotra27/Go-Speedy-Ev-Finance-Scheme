@@ -145,7 +145,7 @@ function SidebarInner({ isOpen, onClose }) {
   };
 
   return (
-    <aside className="w-64 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 flex flex-col h-full select-none transition-colors">
+    <aside className="w-64 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 flex flex-col h-full select-none transition-colors pt-3">
       {/* Brand Header */}
       <div className="h-16 shrink-0 flex items-center px-4 border-b border-slate-100 dark:border-slate-800 justify-between">
         <Link href="/dashboard" className="flex items-center">
