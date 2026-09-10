@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
+import BrandLogo from '../../components/ui/BrandLogo';
 import { Zap } from 'lucide-react';
 
 /**
@@ -87,18 +88,8 @@ export default function OAuthCallbackPage() {
   return (
     <div className="fixed inset-0 bg-[#070c18] flex flex-col items-center justify-center text-white select-none">
       {/* Logo */}
-      <div className="flex items-center gap-3 mb-10">
-        <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 shadow-lg shadow-emerald-500/30">
-          <Zap className="h-6 w-6 fill-white text-white" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-2xl font-black tracking-tight uppercase leading-none">
-            Go<span className="text-emerald-400">Speedy</span>
-          </span>
-          <span className="text-[9px] font-bold text-slate-400 tracking-[0.22em] uppercase mt-0.5">
-            EV Fleet Finance
-          </span>
-        </div>
+      <div className="flex items-center justify-center mb-10">
+        <BrandLogo size="lg" theme="dark" showText={true} />
       </div>
 
       {/* Spinner */}
