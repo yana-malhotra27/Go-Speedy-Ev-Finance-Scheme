@@ -1,14 +1,21 @@
 const supabase = require('../../config/db');
 const { getPaginationOptions, getPaginationMeta } = require('../../utils/pagination');
+const { buildSearchFilter } = require('../../utils/searchFilter');
 
 class ModelsService {
   async getAllModels(query = {}) {
     const { page, limit, offset } = getPaginationOptions(query);
 
-    const { data, count, error } = await supabase
+    let queryBuilder = supabase
       .from('ev_models')
       .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (query.search) {
+      queryBuilder = queryBuilder.or(buildSearchFilter(['name', 'company', 'ward'], query.search));
+    }
+
+    const { data, count, error } = await queryBuilder
       .range(offset, offset + limit - 1);
 
     if (error) throw error;

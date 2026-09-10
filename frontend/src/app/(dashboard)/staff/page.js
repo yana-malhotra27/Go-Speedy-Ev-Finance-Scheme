@@ -10,12 +10,14 @@ import Select from '../../../components/ui/Select';
 import Modal from '../../../components/ui/Modal';
 import Badge from '../../../components/ui/Badge';
 import Pagination from '../../../components/ui/Pagination';
+import SearchBar from '../../../components/ui/SearchBar';
 import ProtectedRoute from '../../../components/layout/ProtectedRoute';
 import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/authStore';
 import { formatDate } from '../../../lib/constants';
 import { toast } from '../../../lib/toast';
 import { confirmDialog } from '../../../lib/confirmDialog';
+import { staggerFadeIn } from '../../../lib/gsap';
 
 const ROLE_OPTIONS = [
   { value: 'staff', label: 'Staff / Operator (Fleet & Collections)' },
@@ -26,6 +28,8 @@ export default function StaffPage() {
   const { user: currentUser } = useAuthStore();
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState(''); // '' | 'true' | 'false'
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -57,12 +61,20 @@ export default function StaffPage() {
 
   useEffect(() => {
     fetchStaff();
-  }, [page]);
+  }, [search, activeFilter, page]);
+
+  // One-time entrance animation for the filter bar
+  useEffect(() => {
+    staggerFadeIn('.gsap-filter-bar', { y: 14, duration: 0.45, stagger: 0 });
+  }, []);
 
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/api/staff?page=${page}&limit=15`);
+      let query = `/api/staff?page=${page}&limit=15`;
+      if (search) query += `&search=${encodeURIComponent(search)}`;
+      if (activeFilter !== '') query += `&is_active=${activeFilter}`;
+      const res = await api.get(query);
       if (res.data?.success) {
         setStaffList(res.data.data || []);
         setTotalPages(res.data.pagination?.totalPages || 1);
@@ -312,6 +324,32 @@ export default function StaffPage() {
       />
 
       <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+        {/* Search & Filter Bar */}
+        <div className="gsap-filter-bar flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 bg-white/90 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 card-elevation shadow-xs dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] transition-colors">
+          <SearchBar
+            value={search}
+            onChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
+            placeholder="Search name, phone or email..."
+            className="w-full sm:max-w-md md:flex-1 md:min-w-0"
+          />
+
+          <select
+            value={activeFilter}
+            onChange={(e) => {
+              setActiveFilter(e.target.value);
+              setPage(1);
+            }}
+            className="w-full md:w-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 py-2 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-colors"
+          >
+            <option value="" className="dark:bg-slate-900">All Staff</option>
+            <option value="true" className="dark:bg-slate-900">Active Only</option>
+            <option value="false" className="dark:bg-slate-900">Deactivated Only</option>
+          </select>
+        </div>
+
         <Table
           columns={columns}
           data={staffList}

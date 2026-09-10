@@ -9,12 +9,15 @@ import Input from '../../../components/ui/Input';
 import Modal from '../../../components/ui/Modal';
 import Badge from '../../../components/ui/Badge';
 import Pagination from '../../../components/ui/Pagination';
+import SearchBar from '../../../components/ui/SearchBar';
 import api from '../../../lib/api';
 import { formatCurrency, formatDate } from '../../../lib/constants';
+import { staggerFadeIn } from '../../../lib/gsap';
 
 export default function ModelsPage() {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -31,12 +34,19 @@ export default function ModelsPage() {
 
   useEffect(() => {
     fetchModels();
-  }, [page]);
+  }, [search, page]);
+
+  // One-time entrance animation for the filter bar
+  useEffect(() => {
+    staggerFadeIn('.gsap-filter-bar', { y: 14, duration: 0.45, stagger: 0 });
+  }, []);
 
   const fetchModels = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/api/models?page=${page}&limit=15`);
+      let query = `/api/models?page=${page}&limit=15`;
+      if (search) query += `&search=${encodeURIComponent(search)}`;
+      const res = await api.get(query);
       if (res.data?.success) {
         setModels(res.data.data || []);
         setTotalPages(res.data.pagination?.totalPages || 1);
@@ -150,6 +160,19 @@ export default function ModelsPage() {
       />
 
       <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+        {/* Search Bar */}
+        <div className="gsap-filter-bar flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/90 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 card-elevation shadow-xs dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] transition-colors">
+          <SearchBar
+            value={search}
+            onChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
+            placeholder="Search model name, company or ward..."
+            className="w-full sm:max-w-md sm:flex-1 sm:min-w-0"
+          />
+        </div>
+
         <Table
           columns={columns}
           data={models}
@@ -218,8 +241,9 @@ export default function ModelsPage() {
               label="Initial Stock Quantity"
               type="number"
               placeholder="10"
+              min={0}
               value={stockCount}
-              onChange={(e) => setStockCount(e.target.value)}
+              onChange={(e) => setStockCount(Math.max(0, Number(e.target.value)).toString())}
               required
             />
           </div>
