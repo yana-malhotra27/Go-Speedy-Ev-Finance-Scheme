@@ -40,6 +40,7 @@ export const REFERENCE_CATEGORIES = [
   { value: 'dsgmc_member', label: 'DSGMC Member' },
   { value: 'nigam_parshad', label: 'Nigam Parshad' },
   { value: 'mla', label: 'MLA' },
+  { value: 'other', label: 'Other (Specify)' },
 ];
 
 export const RTO_TYPES = [
@@ -50,6 +51,7 @@ export const RTO_TYPES = [
 export const HP_FINANCERS = [
   { value: 'go_speedy', label: 'Go Speedy' },
   { value: 'swastik_finance', label: 'Swastik Finance' },
+  { value: 'akasa_finance', label: 'Akasa Finance' },
 ];
 
 export const formatCurrency = (val) => {

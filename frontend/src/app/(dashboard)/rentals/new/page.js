@@ -297,6 +297,12 @@ export default function NewRentalWizardPage() {
       const { booking_id, isDirectPurchase: _, ...restFormData } = formData;
       const payload = {
         ...restFormData,
+        references: formData.references.map(r => ({
+          category: r.category === 'other' ? (r.customCategory || 'Other') : r.category,
+          name: r.name,
+          area: r.area,
+          phone: r.phone
+        })),
         has_pending_docs: hasPendingDocs,
         booking_amount: isDirectPurchase ? 0 : Number(formData.booking_amount || 0),
         downpayment_paid: isDirectPurchase ? 0 : Number(formData.downpayment_paid || 0),
@@ -748,13 +754,23 @@ export default function NewRentalWizardPage() {
               <div className="space-y-3">
                 {formData.references.map((ref, idx) => (
                   <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <Select
-                      label={`Reference #${idx + 1} Category`}
-                      value={ref.category}
-                      onChange={(e) => updateReference(idx, 'category', e.target.value)}
-                      options={REFERENCE_CATEGORIES}
-                      required
-                    />
+                    <div className="space-y-2">
+                      <Select
+                        label={`Reference #${idx + 1} Category`}
+                        value={ref.category}
+                        onChange={(e) => updateReference(idx, 'category', e.target.value)}
+                        options={REFERENCE_CATEGORIES}
+                        required
+                      />
+                      {ref.category === 'other' && (
+                        <Input
+                          placeholder="Please specify category"
+                          value={ref.customCategory || ''}
+                          onChange={(e) => updateReference(idx, 'customCategory', e.target.value)}
+                          required
+                        />
+                      )}
+                    </div>
                     <Input
                       label="Full Name"
                       placeholder="Name"

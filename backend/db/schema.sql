@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   battery_no    TEXT,
   rto_type      TEXT CHECK (rto_type IS NULL OR rto_type IN ('rto','non_rto')),
   hp_financer   TEXT CHECK (hp_financer IS NULL OR
-                            hp_financer IN ('go_speedy','swastik_finance')),
+                            hp_financer IN ('go_speedy','swastik_finance','akasa_finance')),
   date_of_purchase DATE,
   date_of_delivery DATE,
 
