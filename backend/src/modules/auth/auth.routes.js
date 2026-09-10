@@ -179,8 +179,21 @@ router.get('/me', requireAuth, authController.me.bind(authController));
 
 const passport = require('../../config/passport');
 const authService = require('./auth.service');
-const { errorResponse } = require('../../utils/response');
+const { errorResponse, successResponse } = require('../../utils/response');
 const env = require('../../config/env');
+const crypto = require('crypto');
+
+// ─── One-time OAuth exchange store ────────────────────────────────────────────
+// Maps a short-lived random code → { accessToken, refreshToken, userId }
+// Each code expires after 60 seconds and can only be used once.
+const oauthCodeStore = new Map();
+function storeOAuthCode(accessToken, refreshToken, userId) {
+  const code = crypto.randomBytes(32).toString('hex');
+  oauthCodeStore.set(code, { accessToken, refreshToken, userId, expiresAt: Date.now() + 60_000 });
+  // Auto-cleanup after 65s
+  setTimeout(() => oauthCodeStore.delete(code), 65_000);
+  return code;
+}
 
 /**
  * @openapi
@@ -237,7 +250,6 @@ router.post('/sync-session', (req, res) => authController.syncSession(req, res))
 router.get(
   '/google/callback',
   (req, res, next) => {
-    // Resolve destination frontend origin from OAuth state or env fallback
     const rawTarget =
       req.query.state ||
       (env.FRONTEND_URL && env.FRONTEND_URL !== '*' ? env.FRONTEND_URL : 'http://localhost:3000');
@@ -257,25 +269,70 @@ router.get(
 
       try {
         const { accessToken, refreshToken, user } = result;
-        const isProduction = env.NODE_ENV === 'production';
-        const cookieOpts = { httpOnly: true, secure: isProduction, sameSite: 'lax' };
-        if (env.COOKIE_DOMAIN) {
-          cookieOpts.domain = env.COOKIE_DOMAIN;
-        }
-
-        res.cookie('access_token', accessToken, { ...cookieOpts, maxAge: 15 * 60 * 1000 });
-        res.cookie('refresh_token', refreshToken, { ...cookieOpts, maxAge: 7 * 24 * 60 * 60 * 1000 });
-        res.cookie('user_id', user.id, { ...cookieOpts, maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-        return res.redirect(
-          `${cleanOrigin}/oauth-callback?token=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}&userId=${encodeURIComponent(user.id)}`
-        );
+        // Generate a short-lived one-time code instead of setting cookies directly.
+        // Cookies set during a cross-domain redirect (backend → frontend) are blocked
+        // by the browser. The frontend will exchange this code via a same-site AJAX
+        // call (through the Next.js proxy) which CAN set cookies correctly.
+        const code = storeOAuthCode(accessToken, refreshToken, user.id);
+        return res.redirect(`${cleanOrigin}/oauth-callback?code=${code}`);
       } catch (error) {
-        console.error('Cookie/redirect error:', error);
+        console.error('OAuth callback error:', error);
         return res.redirect(`${cleanOrigin}/?error=oauth_failed`);
       }
     })(req, res, next);
   }
 );
+
+/**
+ * @openapi
+ * /api/auth/oauth/exchange:
+ *   post:
+ *     summary: Exchange a one-time OAuth code for auth cookies
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Auth cookies set, user profile returned
+ *       400:
+ *         description: Invalid or expired code
+ */
+router.post('/oauth/exchange', (req, res) => {
+  const { code } = req.body;
+  if (!code) {
+    return errorResponse(res, 400, 'Missing exchange code');
+  }
+
+  const entry = oauthCodeStore.get(code);
+  if (!entry) {
+    return errorResponse(res, 400, 'Invalid or expired OAuth code. Please sign in again.');
+  }
+  if (Date.now() > entry.expiresAt) {
+    oauthCodeStore.delete(code);
+    return errorResponse(res, 400, 'OAuth code has expired. Please sign in again.');
+  }
+
+  // Consume the code (one-time use)
+  oauthCodeStore.delete(code);
+
+  const { accessToken, refreshToken, userId } = entry;
+  const isProduction = env.NODE_ENV === 'production';
+  const cookieOpts = { httpOnly: true, secure: isProduction, sameSite: 'lax' };
+  if (env.COOKIE_DOMAIN) cookieOpts.domain = env.COOKIE_DOMAIN;
+
+  res.cookie('access_token', accessToken, { ...cookieOpts, maxAge: 15 * 60 * 1000 });
+  res.cookie('refresh_token', refreshToken, { ...cookieOpts, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('user_id', userId, { ...cookieOpts, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+  return successResponse(res, 200, { userId }, 'OAuth session established');
+});
 
 module.exports = router;
