@@ -45,8 +45,10 @@ export default function RentalsListPage() {
       if (search) query += `&search=${encodeURIComponent(search)}`;
       if (showCancelled) {
         query += `&status=cancelled`;
-      } else if (statusFilter) {
-        query += `&status=${statusFilter}`;
+      } else if (statusFilter === 'pending_docs') {
+        query += `&has_pending_docs=true`;
+      } else if (statusFilter === 'completed_docs') {
+        query += `&has_pending_docs=false`;
       }
       if (overdueFilter) query += `&overdue_days=${overdueFilter}`;
 
@@ -222,8 +224,9 @@ export default function RentalsListPage() {
                 }}
                 className="w-full md:w-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 py-2 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-colors"
               >
-                <option value="" className="dark:bg-slate-900">All Active Statuses</option>
-                <option value="rented" className="dark:bg-slate-900">Active Rented</option>
+                <option value="" className="dark:bg-slate-900">All Document Statuses</option>
+                <option value="pending_docs" className="dark:bg-slate-900">Pending Documents</option>
+                <option value="completed_docs" className="dark:bg-slate-900">Completed Documents</option>
               </select>
             )}
 

@@ -166,7 +166,7 @@ export default function StaffDashboard() {
         }
       />
 
-      <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
+      <div className="p-4 md:p-4 space-y-6 md:space-y-8 max-w-7xl mx-auto">
         {/* Welcome & Shift Status Banner */}
         <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-[#0d1527] dark:via-[#111e38] dark:to-[#0d1527] border border-slate-700/50 dark:border-white/10 p-5 md:p-6 text-white shadow-lg relative overflow-hidden">
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

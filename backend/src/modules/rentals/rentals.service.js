@@ -23,6 +23,10 @@ class RentalsService {
       queryBuilder = queryBuilder.or(buildSearchFilter(['name', 'phone'], query.search));
     }
 
+    if (query.has_pending_docs !== undefined && query.has_pending_docs !== '') {
+      queryBuilder = queryBuilder.eq('has_pending_docs', query.has_pending_docs === 'true');
+    }
+
     const { data: tenants, count, error } = await queryBuilder
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
