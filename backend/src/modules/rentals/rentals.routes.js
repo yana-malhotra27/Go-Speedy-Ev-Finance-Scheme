@@ -93,6 +93,33 @@ const validateBody = (schema) => (req, res, next) => {
  */
 router.get('/', rentalsController.getAll.bind(rentalsController));
 
+/**
+ * @openapi
+ * /api/rentals/check-uniqueness:
+ *   get:
+ *     summary: Check if hardware or policy numbers are unique
+ *     tags: [Rentals]
+ *     security: [{ cookieAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: chassis_no
+ *         schema: { type: string }
+ *       - in: query
+ *         name: motor_ctrl_no
+ *         schema: { type: string }
+ *       - in: query
+ *         name: battery_no
+ *         schema: { type: string }
+ *       - in: query
+ *         name: scooty_policy_number
+ *         schema: { type: string }
+ *       - in: query
+ *         name: rider_policy_number
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Returns uniqueness status
+ */
 router.get('/check-uniqueness', rentalsController.checkUniqueness.bind(rentalsController));
 
 /**
