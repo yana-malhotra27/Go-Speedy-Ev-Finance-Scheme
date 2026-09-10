@@ -200,7 +200,7 @@ function AdminDashboard() {
             </div>
             <div>
               <p className="text-sm font-bold">Issue New EV Rental</p>
-              <p className="text-xs text-blue-100">8-step fast onboarding wizard</p>
+              <p className="text-xs text-blue-100">9-step fast onboarding wizard</p>
             </div>
           </Link>
 

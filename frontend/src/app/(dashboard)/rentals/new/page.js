@@ -11,6 +11,7 @@ import {
   Users2,
   ShieldAlert,
   Calendar,
+  ShieldCheck,
   ChevronRight,
   ChevronLeft,
   CheckCircle2,
@@ -43,10 +44,11 @@ const ALL_STEPS = [
   { id: 2, name: 'Personal', icon: User },
   { id: 3, name: 'Documents', icon: FileText },
   { id: 4, name: 'Scooty HW', icon: Cpu },
-  { id: 5, name: 'Downpayment', icon: IndianRupee },
-  { id: 6, name: 'References', icon: Users2 },
-  { id: 7, name: 'Guarantors', icon: ShieldAlert },
-  { id: 8, name: 'Installments', icon: Calendar },
+  { id: 5, name: 'Insurance', icon: ShieldCheck },
+  { id: 6, name: 'Downpayment', icon: IndianRupee },
+  { id: 7, name: 'References', icon: Users2 },
+  { id: 8, name: 'Guarantors', icon: ShieldAlert },
+  { id: 9, name: 'Installments', icon: Calendar },
 ];
 
 export default function NewRentalWizardPage() {
@@ -84,6 +86,8 @@ export default function NewRentalWizardPage() {
     tenant_photo_path: '',
     scooty_photo_path: '',
     rent_agreement_path: '',
+    scooty_insurance_path: '',
+    rider_insurance_path: '',
 
     // Step 4: Scooty Hardware
     chassis_no: '',
@@ -93,6 +97,13 @@ export default function NewRentalWizardPage() {
     hp_financer: 'go_speedy',
     date_of_purchase: new Date().toISOString().split('T')[0],
     date_of_delivery: new Date().toISOString().split('T')[0],
+    scooty_insurance_company: '',
+    scooty_policy_number: '',
+    scooty_policy_expiry: '',
+    rider_insurance_company: '',
+    rider_policy_number: '',
+    rider_policy_expiry: '',
+    notes: '',
 
     // Step 5: Financial & Downpayment
     booking_amount: Number(searchParams.get('amount') || 0),
@@ -205,13 +216,20 @@ export default function NewRentalWizardPage() {
         return false;
       }
     }
-    if (step === 5 && !isDirectPurchase) {
+    if (step === 5) {
+      if (!formData.scooty_insurance_company.trim() || !formData.scooty_policy_number.trim() || !formData.scooty_policy_expiry ||
+          !formData.rider_insurance_company.trim() || !formData.rider_policy_number.trim() || !formData.rider_policy_expiry) {
+        setErrorMessage('All insurance details are required');
+        return false;
+      }
+    }
+    if (step === 6 && !isDirectPurchase) {
       if (formData.booking_amount === '' || formData.downpayment_paid === '' || !formData.downpayment_mode) {
         setErrorMessage('All downpayment details are required');
         return false;
       }
     }
-    if (step === 6) {
+    if (step === 7) {
       const missingRef = formData.references.some(r => !r.category || !r.name.trim() || !r.area.trim() || !r.phone.trim());
       if (missingRef) {
         setErrorMessage('All reference details are required');
@@ -223,7 +241,7 @@ export default function NewRentalWizardPage() {
         return false;
       }
     }
-    if (step === 7) {
+    if (step === 8) {
       const missingGuarantor = formData.guarantors.some(g => !g.gender || !g.name.trim() || !g.address.trim() || !g.phone.trim());
       if (missingGuarantor) {
         setErrorMessage('All guarantor details are required');
@@ -235,7 +253,7 @@ export default function NewRentalWizardPage() {
         return false;
       }
     }
-    if (step === 8 && !isDirectPurchase) {
+    if (step === 9 && !isDirectPurchase) {
       if (formData.installment_daily_rate === '' || !formData.installment_frequency || formData.start_date === '' || formData.total_months === '') {
         setErrorMessage('All installment details are required');
         return false;
@@ -244,12 +262,44 @@ export default function NewRentalWizardPage() {
     return true;
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      const currentIndex = STEPS.findIndex(s => s.id === currentStep);
-      if (currentIndex < STEPS.length - 1) {
-        setCurrentStep(STEPS[currentIndex + 1].id);
+  const handleNext = async () => {
+    if (!validateStep(currentStep)) return;
+
+    if (currentStep === 4) {
+      try {
+        setIsSubmitting(true);
+        const res = await api.get(`/api/rentals/check-uniqueness?chassis_no=${encodeURIComponent(formData.chassis_no)}&motor_ctrl_no=${encodeURIComponent(formData.motor_ctrl_no)}&battery_no=${encodeURIComponent(formData.battery_no)}`);
+        if (res.data?.success && res.data.data?.exists) {
+          setErrorMessage(res.data.data.message);
+          return;
+        }
+      } catch (err) {
+        setErrorMessage('Failed to validate hardware numbers');
+        return;
+      } finally {
+        setIsSubmitting(false);
       }
+    }
+
+    if (currentStep === 5) {
+      try {
+        setIsSubmitting(true);
+        const res = await api.get(`/api/rentals/check-uniqueness?scooty_policy_number=${encodeURIComponent(formData.scooty_policy_number)}&rider_policy_number=${encodeURIComponent(formData.rider_policy_number)}`);
+        if (res.data?.success && res.data.data?.exists) {
+          setErrorMessage(res.data.data.message);
+          return;
+        }
+      } catch (err) {
+        setErrorMessage('Failed to validate policy numbers');
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+
+    const currentIndex = STEPS.findIndex(s => s.id === currentStep);
+    if (currentIndex < STEPS.length - 1) {
+      setCurrentStep(STEPS[currentIndex + 1].id);
     }
   };
 
@@ -264,6 +314,7 @@ export default function NewRentalWizardPage() {
   // Submit Flow with Pending Docs check
   const handleSubmitClick = () => {
     setErrorMessage('');
+    if (!validateStep(currentStep)) return;
 
     // Check missing documents
     const docLabels = [
@@ -274,6 +325,8 @@ export default function NewRentalWizardPage() {
       { key: 'tenant_photo_path', label: 'Tenant Profile Photo' },
       { key: 'scooty_photo_path', label: 'Scooty Handover Photo' },
       { key: 'rent_agreement_path', label: 'Rent Agreement Photo' },
+      { key: 'scooty_insurance_path', label: 'Scooty Insurance Policy' },
+      { key: 'rider_insurance_path', label: 'Rider Insurance Policy' },
     ];
 
     const missing = docLabels
@@ -342,7 +395,7 @@ export default function NewRentalWizardPage() {
     <div>
       <Header
         title="Issue New EV Rental"
-        subtitle="8-Step fast registration wizard with draft autosave"
+        subtitle="9-Step fast registration wizard with draft autosave"
         action={
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" icon={RotateCcw} onClick={clearDraft}>
@@ -354,8 +407,8 @@ export default function NewRentalWizardPage() {
 
       <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
         {/* Step Progress Pills */}
-        <div className="bg-white/90 dark:bg-slate-900/60 p-3 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl card-elevation shadow-xs dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] overflow-x-auto -webkit-overflow-scrolling-touch transition-colors">
-          <div className="flex items-center justify-between min-w-[700px]">
+        <div className="bg-white/90 dark:bg-slate-900/60 p-2 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl card-elevation shadow-xs dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] overflow-x-auto -webkit-overflow-scrolling-touch transition-colors">
+          <div className="flex items-center justify-between w-full">
             {STEPS.map((s, idx) => {
               const Icon = s.icon;
               const isDone = currentStep > s.id;
@@ -368,7 +421,7 @@ export default function NewRentalWizardPage() {
                     onClick={() => {
                       if (validateStep(currentStep)) setCurrentStep(s.id);
                     }}
-                    className={`flex items-center gap-2 text-xs font-semibold py-1.5 px-3 rounded-lg transition-smooth ${
+                    className={`flex items-center gap-1 md:gap-2 text-[10px] md:text-xs font-semibold py-1.5 px-1.5 md:px-3 rounded-lg transition-smooth whitespace-nowrap ${
                       isCurrent
                         ? 'bg-blue-600 text-white shadow-sm'
                         : isDone
@@ -377,18 +430,21 @@ export default function NewRentalWizardPage() {
                     }`}
                   >
                     {isDone ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 shrink-0" />
                     ) : (
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-3 h-3 md:w-4 md:h-4 shrink-0" />
                     )}
-                    <span>
+                    <span className="hidden lg:inline">
                       {s.id}. {s.name}
+                    </span>
+                    <span className="lg:hidden">
+                      {s.id}
                     </span>
                   </button>
 
                   {idx < STEPS.length - 1 && (
                     <div
-                      className={`h-0.5 flex-1 mx-2 ${
+                      className={`h-0.5 flex-1 mx-1 md:mx-2 ${
                         isDone ? 'bg-emerald-300' : 'bg-slate-200'
                       }`}
                     />
@@ -525,9 +581,6 @@ export default function NewRentalWizardPage() {
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Document Uploads</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Auto-compressed to WebP ≤ 300KB and saved to private storage
-                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -578,6 +631,18 @@ export default function NewRentalWizardPage() {
                   docType="rent_agreement_path"
                   currentPath={formData.rent_agreement_path}
                   onUploaded={(path) => updateField('rent_agreement_path', path)}
+                />
+                <FileUpload
+                  label="Scooty Insurance Document"
+                  docType="scooty_insurance_path"
+                  currentPath={formData.scooty_insurance_path}
+                  onUploaded={(path) => updateField('scooty_insurance_path', path)}
+                />
+                <FileUpload
+                  label="Rider Insurance Document"
+                  docType="rider_insurance_path"
+                  currentPath={formData.rider_insurance_path}
+                  onUploaded={(path) => updateField('rider_insurance_path', path)}
                 />
               </div>
             </div>
@@ -652,11 +717,90 @@ export default function NewRentalWizardPage() {
                   required
                 />
               </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Additional Notes
+                </label>
+                <textarea
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-smooth"
+                  placeholder="Add a note (e.g., How many times the battery got replaced, how many times the controller or charger got damaged, and how often they came to us for repairs)"
+                  rows={3}
+                  value={formData.notes || ''}
+                  onChange={(e) => updateField('notes', e.target.value)}
+                />
+              </div>
             </div>
           )}
 
-          {/* STEP 5: DOWNPAYMENT */}
+          {/* STEP 5: INSURANCE DETAILS */}
           {currentStep === 5 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Insurance Details</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Mandatory vehicle and rider insurance information
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Scooty Insurance Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Input
+                    label="Insurance Company"
+                    placeholder="e.g. ICICI Lombard"
+                    value={formData.scooty_insurance_company}
+                    onChange={(e) => updateField('scooty_insurance_company', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Policy Number"
+                    placeholder="e.g. POL-123456"
+                    value={formData.scooty_policy_number}
+                    onChange={(e) => updateField('scooty_policy_number', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Expiry Date"
+                    type="date"
+                    value={formData.scooty_policy_expiry}
+                    onChange={(e) => updateField('scooty_policy_expiry', e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 mt-4">
+                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 mt-2">Rider Insurance Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Input
+                    label="Insurance Company"
+                    placeholder="e.g. Bajaj Allianz"
+                    value={formData.rider_insurance_company}
+                    onChange={(e) => updateField('rider_insurance_company', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Policy Number"
+                    placeholder="e.g. POL-987654"
+                    value={formData.rider_policy_number}
+                    onChange={(e) => updateField('rider_policy_number', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Expiry Date"
+                    type="date"
+                    value={formData.rider_policy_expiry}
+                    onChange={(e) => updateField('rider_policy_expiry', e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 6: DOWNPAYMENT */}
+          {currentStep === 6 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Financial Breakdown & Downpayment</h3>
@@ -741,8 +885,8 @@ export default function NewRentalWizardPage() {
             </div>
           )}
 
-          {/* STEP 6: 3 REFERENCES */}
-          {currentStep === 6 && (
+          {/* STEP 7: 3 REFERENCES */}
+          {currentStep === 7 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">3 Notable References</h3>
@@ -798,8 +942,8 @@ export default function NewRentalWizardPage() {
             </div>
           )}
 
-          {/* STEP 7: 2 GUARANTORS */}
-          {currentStep === 7 && (
+          {/* STEP 8: 2 GUARANTORS */}
+          {currentStep === 8 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">2 Co-Signer Guarantors</h3>
@@ -844,8 +988,8 @@ export default function NewRentalWizardPage() {
             </div>
           )}
 
-          {/* STEP 8: INSTALLMENTS & TIMELINE */}
-          {currentStep === 8 && (
+          {/* STEP 9: INSTALLMENTS & TIMELINE */}
+          {currentStep === 9 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Installment Plan & Timeline</h3>
@@ -962,21 +1106,21 @@ export default function NewRentalWizardPage() {
         subtitle="Some document photos have not been uploaded"
       >
         <div className="space-y-4">
-          <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30 text-xs text-amber-800 dark:text-amber-300">
+          <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/20 text-xs text-amber-800 dark:text-amber-500">
             <p className="font-bold flex items-center gap-1.5 mb-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />
               The following documents are not yet uploaded:
             </p>
-            <ul className="list-disc list-inside space-y-0.5 ml-1 text-slate-700 dark:text-slate-300">
+            <ul className="list-disc list-inside space-y-0.5 ml-1 text-slate-700 dark:text-amber-200/70">
               {missingDocsList.map((doc, idx) => (
                 <li key={idx}>{doc}</li>
               ))}
             </ul>
           </div>
 
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-600 dark:text-slate-400">
             Do you want to proceed and issue this rental with documents marked as{' '}
-            <span className="font-bold text-amber-700">pending</span>? Staff can upload them later.
+            <span className="font-bold text-amber-700 dark:text-amber-500">pending</span>? Staff can upload them later.
           </p>
 
           <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">

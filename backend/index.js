@@ -54,7 +54,7 @@ if (env.SWAGGER_ENABLED) {
         <script>
           window.onload = () => {
             window.ui = SwaggerUIBundle({
-              url: '/api/docs.json',
+              url: '/api/docs.json?t=' + Date.now(),
               dom_id: '#swagger-ui',
             });
           };
@@ -64,6 +64,7 @@ if (env.SWAGGER_ENABLED) {
     `);
   });
   app.get('/api/docs.json', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
   });

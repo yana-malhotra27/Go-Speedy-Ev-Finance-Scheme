@@ -219,7 +219,7 @@ export default function StaffDashboard() {
               </div>
               <div className="mt-3">
                 <h4 className="text-base font-bold text-white leading-tight">Issue New Rental</h4>
-                <p className="text-xs text-blue-100 mt-0.5">8-step fast onboarding wizard</p>
+                <p className="text-xs text-blue-100 mt-0.5">9-step fast onboarding wizard</p>
               </div>
             </Link>
 

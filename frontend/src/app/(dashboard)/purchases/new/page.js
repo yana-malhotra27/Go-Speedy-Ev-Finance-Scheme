@@ -10,6 +10,7 @@ import {
   IndianRupee,
   Users2,
   ShieldAlert,
+  ShieldCheck,
   Calendar,
   ChevronRight,
   ChevronLeft,
@@ -41,10 +42,9 @@ const ALL_STEPS = [
   { id: 2, name: 'Personal', icon: User },
   { id: 3, name: 'Documents', icon: FileText },
   { id: 4, name: 'Scooty HW', icon: Cpu },
-  { id: 5, name: 'Downpayment', icon: IndianRupee },
+  { id: 5, name: 'Insurance', icon: ShieldCheck },
   { id: 6, name: 'References', icon: Users2 },
   { id: 7, name: 'Guarantors', icon: ShieldAlert },
-  { id: 8, name: 'Installments', icon: Calendar },
 ];
 
 export default function NewPurchaseWizardPage() {
@@ -62,7 +62,7 @@ export default function NewPurchaseWizardPage() {
 
   // Form State
   const isDirectPurchase = true;
-  const STEPS = ALL_STEPS.filter(s => s.id !== 5 && s.id !== 8);
+  const STEPS = ALL_STEPS;
   const [formData, setFormData] = useState({
     // Step 1: Model
     ev_model_id: searchParams.get('model_id') || '',
@@ -72,7 +72,7 @@ export default function NewPurchaseWizardPage() {
     phone: searchParams.get('phone') || '',
     gender: 'male',
     address: '',
-    rent_agreement_signed: false,
+    invoice_generated: false,
 
     // Step 3: Documents
     aadhar_path: '',
@@ -81,6 +81,15 @@ export default function NewPurchaseWizardPage() {
     electricity_bill_path: '',
     tenant_photo_path: '',
     scooty_photo_path: '',
+    invoice_doc_path: '',
+    scooty_insurance_path: '',
+    rider_insurance_path: '',
+    scooty_insurance_company: '',
+    scooty_policy_number: '',
+    scooty_policy_expiry: '',
+    rider_insurance_company: '',
+    rider_policy_number: '',
+    rider_policy_expiry: '',
 
     // Step 4: Scooty Hardware
     chassis_no: '',
@@ -90,14 +99,6 @@ export default function NewPurchaseWizardPage() {
     hp_financer: 'go_speedy',
     date_of_purchase: new Date().toISOString().split('T')[0],
     date_of_delivery: new Date().toISOString().split('T')[0],
-
-    // Step 5: Financial & Downpayment
-    booking_amount: Number(searchParams.get('amount') || 0),
-    downpayment_paid: 10000,
-    downpayment_mode: 'cash',
-    dp_by_other: false,
-    dp_other_name: '',
-    dp_other_phone: '',
 
     // Step 6: 3 References
     references: [
@@ -109,15 +110,6 @@ export default function NewPurchaseWizardPage() {
       { gender: 'male', name: '', address: '', phone: '' },
       { gender: 'female', name: '', address: '', phone: '' },
     ],
-
-    // Step 8: Installments & Timeline
-    installment_daily_rate: 250,
-    installment_frequency: 'daily',
-    installment_by_self: true,
-    installment_other_name: '',
-    installment_other_phone: '',
-    start_date: new Date().toISOString().split('T')[0],
-    total_months: 24,
 
     // Optional booking linkage
     booking_id: searchParams.get('booking_id') || '',
@@ -196,8 +188,12 @@ export default function NewPurchaseWizardPage() {
       }
     }
     if (step === 5) {
-      if (formData.booking_amount === '' || formData.downpayment_paid === '' || !formData.downpayment_mode) {
-        setErrorMessage('All downpayment details are required');
+      if (!formData.scooty_insurance_company.trim() || !formData.scooty_policy_number.trim() || !formData.scooty_policy_expiry) {
+        setErrorMessage('All Scooty insurance details are required');
+        return false;
+      }
+      if (!formData.rider_insurance_company.trim() || !formData.rider_policy_number.trim() || !formData.rider_policy_expiry) {
+        setErrorMessage('All Rider insurance details are required');
         return false;
       }
     }
@@ -225,21 +221,47 @@ export default function NewPurchaseWizardPage() {
         return false;
       }
     }
-    if (step === 8 && !isDirectPurchase) {
-      if (formData.installment_daily_rate === '' || !formData.installment_frequency || formData.start_date === '' || formData.total_months === '') {
-        setErrorMessage('All installment details are required');
-        return false;
-      }
-    }
     return true;
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      const currentIndex = STEPS.findIndex(s => s.id === currentStep);
-      if (currentIndex < STEPS.length - 1) {
-        setCurrentStep(STEPS[currentIndex + 1].id);
+  const handleNext = async () => {
+    if (!validateStep(currentStep)) return;
+
+    if (currentStep === 4) {
+      try {
+        setIsSubmitting(true);
+        const res = await api.get(`/api/rentals/check-uniqueness?chassis_no=${encodeURIComponent(formData.chassis_no)}&motor_ctrl_no=${encodeURIComponent(formData.motor_ctrl_no)}&battery_no=${encodeURIComponent(formData.battery_no)}`);
+        if (res.data?.success && res.data.data?.exists) {
+          setErrorMessage(res.data.data.message);
+          return;
+        }
+      } catch (err) {
+        setErrorMessage('Failed to validate hardware numbers');
+        return;
+      } finally {
+        setIsSubmitting(false);
       }
+    }
+
+    if (currentStep === 5) {
+      try {
+        setIsSubmitting(true);
+        const res = await api.get(`/api/rentals/check-uniqueness?scooty_policy_number=${encodeURIComponent(formData.scooty_policy_number)}&rider_policy_number=${encodeURIComponent(formData.rider_policy_number)}`);
+        if (res.data?.success && res.data.data?.exists) {
+          setErrorMessage(res.data.data.message);
+          return;
+        }
+      } catch (err) {
+        setErrorMessage('Failed to validate policy numbers');
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+
+    const currentIndex = STEPS.findIndex(s => s.id === currentStep);
+    if (currentIndex < STEPS.length - 1) {
+      setCurrentStep(STEPS[currentIndex + 1].id);
     }
   };
 
@@ -254,6 +276,7 @@ export default function NewPurchaseWizardPage() {
   // Submit Flow with Pending Docs check
   const handleSubmitClick = () => {
     setErrorMessage('');
+    if (!validateStep(currentStep)) return;
 
     // Check missing documents
     const docLabels = [
@@ -263,6 +286,9 @@ export default function NewPurchaseWizardPage() {
       { key: 'electricity_bill_path', label: 'Electricity Bill Photo' },
       { key: 'tenant_photo_path', label: 'Buyer Profile Photo' },
       { key: 'scooty_photo_path', label: 'Scooty Handover Photo' },
+      { key: 'invoice_doc_path', label: 'Invoice Document' },
+      { key: 'scooty_insurance_path', label: 'Scooty Insurance Photo' },
+      { key: 'rider_insurance_path', label: 'Rider Insurance Photo' },
     ];
 
     const missing = docLabels
@@ -287,11 +313,11 @@ export default function NewPurchaseWizardPage() {
       const payload = {
         ...restFormData,
         has_pending_docs: hasPendingDocs,
-        booking_amount: isDirectPurchase ? 0 : Number(formData.booking_amount || 0),
-        downpayment_paid: isDirectPurchase ? 0 : Number(formData.downpayment_paid || 0),
-        installment_daily_rate: Number(formData.installment_daily_rate || 250),
-        total_months: Number(formData.total_months || 24),
-        status: isDirectPurchase ? 'direct_purchase' : undefined,
+        booking_amount: 0,
+        downpayment_paid: 0,
+        installment_daily_rate: 0,
+        total_months: 0,
+        status: 'direct_purchase',
       };
 
       let res;
@@ -304,7 +330,7 @@ export default function NewPurchaseWizardPage() {
       if (res.data?.success) {
         localStorage.removeItem(DRAFT_KEY);
         const newId = res.data.data?.id;
-        router.replace(`/rentals/${newId}`);
+        router.replace(`/purchases/${newId}`);
       } else {
         throw new Error(res.data?.message || 'Submission failed');
       }
@@ -318,13 +344,11 @@ export default function NewPurchaseWizardPage() {
     }
   };
 
-  const selectedModel = models.find((m) => m.id === formData.ev_model_id);
-
   return (
     <div>
       <Header
         title="New Direct Purchase"
-        subtitle="6-Step fast registration wizard with draft autosave"
+        subtitle="5-Step fast registration wizard with draft autosave"
         action={
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" icon={RotateCcw} onClick={clearDraft}>
@@ -335,9 +359,8 @@ export default function NewPurchaseWizardPage() {
       />
 
       <div className="p-8 max-w-5xl mx-auto space-y-6">
-        {/* Step Progress Pills */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 card-elevation overflow-x-auto">
-          <div className="flex items-center justify-between min-w-[700px]">
+        <div className="bg-white/90 dark:bg-slate-900/60 p-2 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl card-elevation shadow-xs dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] overflow-x-auto -webkit-overflow-scrolling-touch transition-colors">
+          <div className="flex items-center justify-between w-full">
             {STEPS.map((s, idx) => {
               const Icon = s.icon;
               const isDone = currentStep > s.id;
@@ -350,7 +373,7 @@ export default function NewPurchaseWizardPage() {
                     onClick={() => {
                       if (validateStep(currentStep)) setCurrentStep(s.id);
                     }}
-                    className={`flex items-center gap-2 text-xs font-semibold py-1.5 px-3 rounded-lg transition-smooth ${
+                    className={`flex items-center gap-1 md:gap-2 text-[10px] md:text-xs font-semibold py-1.5 px-1.5 md:px-3 rounded-lg transition-smooth whitespace-nowrap ${
                       isCurrent
                         ? 'bg-blue-600 text-white shadow-sm'
                         : isDone
@@ -359,19 +382,22 @@ export default function NewPurchaseWizardPage() {
                     }`}
                   >
                     {isDone ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 shrink-0" />
                     ) : (
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-3 h-3 md:w-4 md:h-4 shrink-0" />
                     )}
-                    <span>
+                    <span className="hidden lg:inline">
                       {s.id}. {s.name}
+                    </span>
+                    <span className="lg:hidden">
+                      {s.id}
                     </span>
                   </button>
 
                   {idx < STEPS.length - 1 && (
                     <div
-                      className={`h-0.5 flex-1 mx-2 ${
-                        isDone ? 'bg-emerald-300' : 'bg-slate-200'
+                      className={`h-0.5 flex-1 mx-1 md:mx-2 ${
+                        isDone ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700/50'
                       }`}
                     />
                   )}
@@ -381,7 +407,6 @@ export default function NewPurchaseWizardPage() {
           </div>
         </div>
 
-        {/* Error Alert */}
         {errorMessage && (
           <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-xs font-semibold text-rose-700 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -389,14 +414,12 @@ export default function NewPurchaseWizardPage() {
           </div>
         )}
 
-        {/* Wizard Form Card */}
         <Card>
-          {/* STEP 1: MODEL */}
           {currentStep === 1 && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Select EV Scooter Model</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Select EV Scooter Model</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
                   Choose from models currently available in Delhi hubs
                 </p>
               </div>
@@ -412,26 +435,26 @@ export default function NewPurchaseWizardPage() {
                       onClick={() => inStock && updateField('ev_model_id', m.id)}
                       className={`p-4 rounded-xl border-2 transition-smooth cursor-pointer ${
                         selected
-                          ? 'border-blue-600 bg-blue-50/40 shadow-sm'
+                          ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-500/10 shadow-sm'
                           : inStock
-                          ? 'border-slate-200 hover:border-slate-300 bg-white'
-                          : 'border-slate-200 bg-slate-100 opacity-60 cursor-not-allowed'
+                          ? 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800/60'
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/40 opacity-60 cursor-not-allowed'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900">{m.name}</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{m.name}</span>
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                             inStock
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-rose-100 text-rose-700'
+                              ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400'
                           }`}
                         >
                           {m.stock_count} in stock
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">{m.company} • {m.ward}</p>
-                      <p className="text-sm font-black text-blue-600 mt-3">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{m.company} • {m.ward}</p>
+                      <p className="text-sm font-black text-blue-600 dark:text-blue-400 mt-3">
                         {formatCurrency(m.total_price)}
                       </p>
                     </div>
@@ -441,12 +464,11 @@ export default function NewPurchaseWizardPage() {
             </div>
           )}
 
-          {/* STEP 2: PERSONAL */}
           {currentStep === 2 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Buyer Personal Details</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Buyer Personal Details</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
                   Legal identity information for contract agreement
                 </p>
               </div>
@@ -488,28 +510,24 @@ export default function NewPurchaseWizardPage() {
                 />
               </div>
 
-              <div className="pt-2">
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+              <div className="pt-4 pb-2">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.rent_agreement_signed}
-                    onChange={(e) => updateField('rent_agreement_signed', e.target.checked)}
+                    checked={formData.invoice_generated}
+                    onChange={(e) => updateField('invoice_generated', e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span>Physical rent agreement physically signed and verified</span>
+                  <span>Invoice generated and verified</span>
                 </label>
               </div>
             </div>
           )}
 
-          {/* STEP 3: DOCUMENTS */}
           {currentStep === 3 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Document Uploads</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Auto-compressed to WebP ≤ 300KB and saved to private storage
-                </p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Document Uploads</h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -554,16 +572,33 @@ export default function NewPurchaseWizardPage() {
                   currentPath={formData.scooty_photo_path}
                   onUploaded={(path) => updateField('scooty_photo_path', path)}
                 />
+                <FileUpload
+                  label="Invoice Document"
+                  docType="invoice_doc_path"
+                  currentPath={formData.invoice_doc_path}
+                  onUploaded={(path) => updateField('invoice_doc_path', path)}
+                />
+                <FileUpload
+                  label="Scooty Insurance Document"
+                  docType="scooty_insurance_path"
+                  currentPath={formData.scooty_insurance_path}
+                  onUploaded={(path) => updateField('scooty_insurance_path', path)}
+                />
+                <FileUpload
+                  label="Rider Insurance Document"
+                  docType="rider_insurance_path"
+                  currentPath={formData.rider_insurance_path}
+                  onUploaded={(path) => updateField('rider_insurance_path', path)}
+                />
               </div>
             </div>
           )}
 
-          {/* STEP 4: SCOOTY HARDWARE */}
           {currentStep === 4 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">EV Hardware Identification</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">EV Hardware Identification</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
                   Unique serial numbers for vehicle tracking and compliance
                 </p>
               </div>
@@ -630,85 +665,71 @@ export default function NewPurchaseWizardPage() {
             </div>
           )}
 
-          {/* STEP 5: DOWNPAYMENT */}
           {currentStep === 5 && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Financial Breakdown & Downpayment</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Booking deduction and day-1 initial payment
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Insurance Details</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
+                  Mandatory insurance information and documents for Scooty and Rider
                 </p>
               </div>
 
-              {selectedModel && (
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase">Sticker Price</span>
-                    <p className="text-base font-black text-slate-900">{formatCurrency(selectedModel.total_price)}</p>
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase">Advance Booking</span>
-                    <p className="text-base font-black text-emerald-600">-{formatCurrency(formData.booking_amount)}</p>
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase">Contract Net</span>
-                    <p className="text-base font-black text-blue-600">
-                      {formatCurrency(selectedModel.total_price - formData.booking_amount)}
-                    </p>
-                  </div>
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-800 pb-2">
+                  Scooty Insurance
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Input
+                    label="Insurance Company"
+                    placeholder="e.g. Bajaj Allianz"
+                    value={formData.scooty_insurance_company}
+                    onChange={(e) => updateField('scooty_insurance_company', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Policy Number"
+                    placeholder="e.g. POL-12345"
+                    value={formData.scooty_policy_number}
+                    onChange={(e) => updateField('scooty_policy_number', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Expiry Date"
+                    type="date"
+                    value={formData.scooty_policy_expiry}
+                    onChange={(e) => updateField('scooty_policy_expiry', e.target.value)}
+                    required
+                  />
                 </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Booking Token Amount (₹)"
-                  type="number"
-                  value={formData.booking_amount}
-                  onChange={(e) => updateField('booking_amount', e.target.value)}
-                />
-
-                <Input
-                  label="Downpayment Paid on Delivery (₹)"
-                  type="number"
-                  value={formData.downpayment_paid}
-                  onChange={(e) => updateField('downpayment_paid', e.target.value)}
-                />
-
-                <Select
-                  label="Downpayment Mode"
-                  value={formData.downpayment_mode}
-                  onChange={(e) => updateField('downpayment_mode', e.target.value)}
-                  options={DOWNPAYMENT_MODES}
-                />
               </div>
 
-              <div className="pt-2 border-t border-slate-100">
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.dp_by_other}
-                    onChange={(e) => updateField('dp_by_other', e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              <div className="space-y-4 pt-4">
+                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-800 pb-2">
+                  Rider Insurance
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Input
+                    label="Insurance Company"
+                    placeholder="e.g. ICICI Lombard"
+                    value={formData.rider_insurance_company}
+                    onChange={(e) => updateField('rider_insurance_company', e.target.value)}
+                    required
                   />
-                  <span>Downpayment paid by another person (sponsor / relative)</span>
-                </label>
-
-                {formData.dp_by_other && (
-                  <div className="grid grid-cols-2 gap-4 mt-3">
-                    <Input
-                      label="Sponsor Full Name"
-                      placeholder="Name"
-                      value={formData.dp_other_name}
-                      onChange={(e) => updateField('dp_other_name', e.target.value)}
-                    />
-                    <Input
-                      label="Sponsor Mobile Phone"
-                      placeholder="Phone"
-                      value={formData.dp_other_phone}
-                      onChange={(e) => updateField('dp_other_phone', e.target.value)}
-                    />
-                  </div>
-                )}
+                  <Input
+                    label="Policy Number"
+                    placeholder="e.g. POL-98765"
+                    value={formData.rider_policy_number}
+                    onChange={(e) => updateField('rider_policy_number', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Expiry Date"
+                    type="date"
+                    value={formData.rider_policy_expiry}
+                    onChange={(e) => updateField('rider_policy_expiry', e.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -717,7 +738,7 @@ export default function NewPurchaseWizardPage() {
           {currentStep === 6 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">3 Notable References</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">3 Notable References</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   DSGMC Member, Nigam Parshad, MLA or respected community references
                 </p>
@@ -725,7 +746,7 @@ export default function NewPurchaseWizardPage() {
 
               <div className="space-y-3">
                 {formData.references.map((ref, idx) => (
-                  <div key={idx} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <Select
                       label={`Reference #${idx + 1} Category`}
                       value={ref.category}
@@ -764,7 +785,7 @@ export default function NewPurchaseWizardPage() {
           {currentStep === 7 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">2 Co-Signer Guarantors</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">2 Co-Signer Guarantors</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   1 Male and 1 Female guarantor mandatory per policy
                 </p>
@@ -772,9 +793,9 @@ export default function NewPurchaseWizardPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {formData.guarantors.map((g, idx) => (
-                  <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         Guarantor #{idx + 1} ({g.gender.toUpperCase()})
                       </span>
                     </div>
@@ -806,80 +827,6 @@ export default function NewPurchaseWizardPage() {
             </div>
           )}
 
-          {/* STEP 8: INSTALLMENTS & TIMELINE */}
-          {currentStep === 8 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Installment Plan & Timeline</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Standard collection terms: ₹250/day over 24-month horizon
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Input
-                  label="Daily Rate (₹)"
-                  type="number"
-                  value={formData.installment_daily_rate}
-                  onChange={(e) => updateField('installment_daily_rate', e.target.value)}
-                  required
-                />
-
-                <Select
-                  label="Collection Schedule"
-                  value={formData.installment_frequency}
-                  onChange={(e) => updateField('installment_frequency', e.target.value)}
-                  options={INSTALLMENT_FREQUENCIES}
-                />
-
-                <Input
-                  label="Contract Total Horizon (Months)"
-                  type="number"
-                  value={formData.total_months}
-                  onChange={(e) => updateField('total_months', e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Contract Effective Start Date"
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => updateField('start_date', e.target.value)}
-                />
-              </div>
-
-              <div className="pt-2 border-t border-slate-100">
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={!formData.installment_by_self}
-                    onChange={(e) => updateField('installment_by_self', !e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span>Installments paid by another person / payer</span>
-                </label>
-
-                {!formData.installment_by_self && (
-                  <div className="grid grid-cols-2 gap-4 mt-3">
-                    <Input
-                      label="Payer Full Name"
-                      placeholder="Name"
-                      value={formData.installment_other_name}
-                      onChange={(e) => updateField('installment_other_name', e.target.value)}
-                    />
-                    <Input
-                      label="Payer Mobile Phone"
-                      placeholder="Phone"
-                      value={formData.installment_other_phone}
-                      onChange={(e) => updateField('installment_other_phone', e.target.value)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Wizard Footer Controls */}
           <div className="flex items-center justify-between border-t border-slate-100 pt-5 mt-6">
             <Button
@@ -907,7 +854,7 @@ export default function NewPurchaseWizardPage() {
                 loading={isSubmitting}
                 onClick={handleSubmitClick}
               >
-                Complete & Issue Rental
+                Complete & Issue Purchase
               </Button>
             )}
           </div>
@@ -922,24 +869,24 @@ export default function NewPurchaseWizardPage() {
         subtitle="Some document photos have not been uploaded"
       >
         <div className="space-y-4">
-          <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
+          <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/20 text-xs text-amber-800 dark:text-amber-500">
             <p className="font-bold flex items-center gap-1.5 mb-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />
               The following documents are not yet uploaded:
             </p>
-            <ul className="list-disc list-inside space-y-0.5 ml-1 text-slate-700">
+            <ul className="list-disc list-inside space-y-0.5 ml-1 text-slate-700 dark:text-amber-200/70">
               {missingDocsList.map((doc, idx) => (
                 <li key={idx}>{doc}</li>
               ))}
             </ul>
           </div>
 
-          <p className="text-xs text-slate-600">
-            Do you want to proceed and issue this rental with documents marked as{' '}
-            <span className="font-bold text-amber-700">pending</span>? Staff can upload them later.
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            Do you want to proceed and issue this purchase with documents marked as{' '}
+            <span className="font-bold text-amber-700 dark:text-amber-500">pending</span>? Staff can upload them later.
           </p>
 
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="outline"
               size="md"
