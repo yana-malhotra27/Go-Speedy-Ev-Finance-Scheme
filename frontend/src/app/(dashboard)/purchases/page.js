@@ -60,7 +60,7 @@ export default function PurchasesPage() {
           </div>
           <div>
             <Link
-              href={`/rentals/${row.id}`}
+              href={`/purchases/${row.id}`}
               className="font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
             >
               {row.name}
@@ -128,7 +128,7 @@ export default function PurchasesPage() {
       key: 'action',
       render: (row) => (
         <Link
-          href={`/rentals/${row.id}`}
+          href={`/purchases/${row.id}`}
           className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
         >
           View Ledger <ArrowRight className="w-3.5 h-3.5" />

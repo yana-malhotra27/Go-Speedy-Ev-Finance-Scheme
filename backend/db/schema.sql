@@ -69,6 +69,8 @@ CREATE TABLE IF NOT EXISTS tenants (
   tenant_photo_path     TEXT,
   scooty_photo_path     TEXT,
   rent_agreement_path   TEXT,
+  scooty_insurance_path TEXT,
+  rider_insurance_path  TEXT,
 
   -- Scooty hardware
   chassis_no    TEXT,
@@ -111,6 +113,15 @@ CREATE TABLE IF NOT EXISTS tenants (
   created_by   UUID REFERENCES users(id),
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  notes        TEXT,
+
+  -- Insurance
+  scooty_insurance_company TEXT,
+  scooty_policy_number     TEXT,
+  scooty_policy_expiry     DATE,
+  rider_insurance_company  TEXT,
+  rider_policy_number      TEXT,
+  rider_policy_expiry      DATE,
 
   -- Financial sanity checks
   CONSTRAINT chk_booking_lte_price

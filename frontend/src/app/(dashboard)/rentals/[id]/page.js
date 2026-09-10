@@ -106,6 +106,13 @@ export default function TenantDetailPage() {
           installment_frequency: t.installment_frequency || '',
           references: Array.isArray(t.references) ? t.references : [],
           guarantors: Array.isArray(t.guarantors) ? t.guarantors : [],
+          notes: t.notes || '',
+          scooty_insurance_company: t.scooty_insurance_company || '',
+          scooty_policy_number: t.scooty_policy_number || '',
+          scooty_policy_expiry: t.scooty_policy_expiry ? t.scooty_policy_expiry.split('T')[0] : '',
+          rider_insurance_company: t.rider_insurance_company || '',
+          rider_policy_number: t.rider_policy_number || '',
+          rider_policy_expiry: t.rider_policy_expiry ? t.rider_policy_expiry.split('T')[0] : '',
         });
       }
       if (paymentsRes.data?.success) {
@@ -272,14 +279,16 @@ export default function TenantDetailPage() {
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={Edit}
-                  onClick={() => setIsEditMode(true)}
-                >
-                  Edit Details
-                </Button>
+                {tenant.status !== 'cancelled' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={Edit}
+                    onClick={() => setIsEditMode(true)}
+                  >
+                    Edit Details
+                  </Button>
+                )}
                 {isRented && (
                   <>
                     <Button
@@ -506,25 +515,19 @@ export default function TenantDetailPage() {
                   </>
                 )}
               </div>
-            </div>
 
-            <hr className="my-6 border-slate-100" />
-            <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Contract & Financials</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              {/* Scooty Insurance */}
               <div>
                 {isEditMode ? (
                   <Input
-                    type="date"
-                    label="Start Date"
-                    value={editData.start_date}
-                    onChange={(e) => setEditData({ ...editData, start_date: e.target.value })}
+                    label="Scooty Ins. Company"
+                    value={editData.scooty_insurance_company}
+                    onChange={(e) => setEditData({ ...editData, scooty_insurance_company: e.target.value })}
                   />
                 ) : (
                   <>
-                    <p className="font-bold text-slate-400 uppercase text-[10px]">Agreement Dates</p>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
-                      Start: {formatDate(tenant.start_date)} • End: {formatDate(tenant.expected_end_date)}
-                    </p>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Scooty Ins. Company</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.scooty_insurance_company || '—'}</p>
                   </>
                 )}
               </div>
@@ -532,36 +535,162 @@ export default function TenantDetailPage() {
               <div>
                 {isEditMode ? (
                   <Input
-                    type="number"
-                    label="Installment Rate (₹)"
-                    value={editData.installment_daily_rate}
-                    onChange={(e) => setEditData({ ...editData, installment_daily_rate: e.target.value })}
+                    label="Scooty Policy #"
+                    value={editData.scooty_policy_number}
+                    onChange={(e) => setEditData({ ...editData, scooty_policy_number: e.target.value })}
                   />
                 ) : (
                   <>
-                    <p className="font-bold text-slate-400 uppercase text-[10px]">Installment Terms</p>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
-                      ₹{tenant.installment_daily_rate}/day ({tenant.installment_frequency})
-                    </p>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Scooty Policy #</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.scooty_policy_number || '—'}</p>
+                  </>
+                )}
+              </div>
+
+              <div>
+                {isEditMode ? (
+                  <Input
+                    label="Scooty Policy Expiry"
+                    type="date"
+                    value={editData.scooty_policy_expiry}
+                    onChange={(e) => setEditData({ ...editData, scooty_policy_expiry: e.target.value })}
+                  />
+                ) : (
+                  <>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Scooty Policy Expiry</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.scooty_policy_expiry ? formatDate(tenant.scooty_policy_expiry) : '—'}</p>
                   </>
                 )}
               </div>
               
-              {isEditMode && (
-                <div>
-                  <Select
-                    label="Frequency"
-                    value={editData.installment_frequency}
-                    onChange={(e) => setEditData({ ...editData, installment_frequency: e.target.value })}
-                    options={[
-                      { value: 'daily', label: 'Daily' },
-                      { value: 'weekly', label: 'Weekly' },
-                      { value: 'monthly', label: 'Monthly' },
-                    ]}
+              {/* Rider Insurance */}
+              <div>
+                {isEditMode ? (
+                  <Input
+                    label="Rider Ins. Company"
+                    value={editData.rider_insurance_company}
+                    onChange={(e) => setEditData({ ...editData, rider_insurance_company: e.target.value })}
                   />
-                </div>
-              )}
+                ) : (
+                  <>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Rider Ins. Company</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.rider_insurance_company || '—'}</p>
+                  </>
+                )}
+              </div>
+
+              <div>
+                {isEditMode ? (
+                  <Input
+                    label="Rider Policy #"
+                    value={editData.rider_policy_number}
+                    onChange={(e) => setEditData({ ...editData, rider_policy_number: e.target.value })}
+                  />
+                ) : (
+                  <>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Rider Policy #</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.rider_policy_number || '—'}</p>
+                  </>
+                )}
+              </div>
+
+              <div>
+                {isEditMode ? (
+                  <Input
+                    label="Rider Policy Expiry"
+                    type="date"
+                    value={editData.rider_policy_expiry}
+                    onChange={(e) => setEditData({ ...editData, rider_policy_expiry: e.target.value })}
+                  />
+                ) : (
+                  <>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Rider Policy Expiry</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.rider_policy_expiry ? formatDate(tenant.rider_policy_expiry) : '—'}</p>
+                  </>
+                )}
+              </div>
+
+              <div className="sm:col-span-2">
+                {isEditMode ? (
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Additional Notes
+                    </label>
+                    <textarea
+                      className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-smooth"
+                      placeholder="Add a note (e.g., How many times the battery or controller or charger got replaced, and how often they came to us for repairs)"
+                      rows={3}
+                      value={editData.notes || ''}
+                      onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <p className="font-bold text-slate-400 uppercase text-[10px]">Additional Notes</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{tenant.notes || '—'}</p>
+                  </>
+                )}
+              </div>
             </div>
+
+            {tenant.status !== 'direct_purchase' && (
+              <>
+                <hr className="my-6 border-slate-100" />
+                <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Contract & Financials</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    {isEditMode ? (
+                      <Input
+                        type="date"
+                        label="Start Date"
+                        value={editData.start_date}
+                        onChange={(e) => setEditData({ ...editData, start_date: e.target.value })}
+                      />
+                    ) : (
+                      <>
+                        <p className="font-bold text-slate-400 uppercase text-[10px]">Agreement Dates</p>
+                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
+                          Start: {formatDate(tenant.start_date)} • End: {formatDate(tenant.expected_end_date)}
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  <div>
+                    {isEditMode ? (
+                      <Input
+                        type="number"
+                        label="Installment Rate (₹)"
+                        value={editData.installment_daily_rate}
+                        onChange={(e) => setEditData({ ...editData, installment_daily_rate: e.target.value })}
+                      />
+                    ) : (
+                      <>
+                        <p className="font-bold text-slate-400 uppercase text-[10px]">Installment Terms</p>
+                        <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
+                          ₹{tenant.installment_daily_rate}/day ({tenant.installment_frequency})
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  
+                  {isEditMode && (
+                    <div>
+                      <Select
+                        label="Frequency"
+                        value={editData.installment_frequency}
+                        onChange={(e) => setEditData({ ...editData, installment_frequency: e.target.value })}
+                        options={[
+                          { value: 'daily', label: 'Daily' },
+                          { value: 'weekly', label: 'Weekly' },
+                          { value: 'monthly', label: 'Monthly' },
+                        ]}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* References & Guarantors summary */}
             <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -570,7 +699,7 @@ export default function TenantDetailPage() {
                 {isEditMode ? (
                   <div className="space-y-3">
                     {editData.references.map((r, i) => (
-                      <div key={i} className="p-2 border border-slate-100 bg-slate-50 rounded-lg space-y-2">
+                      <div key={i} className="space-y-2 mb-4">
                         <Input
                           placeholder="Reference Name"
                           value={r.name || ''}
@@ -615,7 +744,7 @@ export default function TenantDetailPage() {
                 {isEditMode ? (
                   <div className="space-y-3">
                     {editData.guarantors.map((g, i) => (
-                      <div key={i} className="p-2 border border-slate-100 bg-slate-50 rounded-lg space-y-2">
+                      <div key={i} className="space-y-2 mb-4">
                         <Input
                           placeholder="Guarantor Name"
                           value={g.name || ''}
@@ -664,8 +793,13 @@ export default function TenantDetailPage() {
                 { label: 'PAN Card', url: signedDocs.pan_url, path: tenant.pan_path, docType: 'pan_path' },
                 { label: 'Cheque', url: signedDocs.cheque_url, path: tenant.cheque_path, docType: 'cheque_path' },
                 { label: 'Electricity Bill', url: signedDocs.electricity_bill_url, path: tenant.electricity_bill_path, docType: 'electricity_bill_path' },
-                { label: 'Tenant Photo', url: signedDocs.tenant_photo_url, path: tenant.tenant_photo_path, docType: 'tenant_photo_path' },
+                { label: tenant.status === 'direct_purchase' ? 'Buyer Photo' : 'Tenant Photo', url: signedDocs.tenant_photo_url, path: tenant.tenant_photo_path, docType: 'tenant_photo_path' },
                 { label: 'Scooty Photo', url: signedDocs.scooty_photo_url, path: tenant.scooty_photo_path, docType: 'scooty_photo_path' },
+                tenant.status === 'direct_purchase'
+                  ? { label: 'Invoice Document', url: signedDocs.invoice_doc_url, path: tenant.invoice_doc_path, docType: 'invoice_doc_path' }
+                  : { label: 'Rent Agreement', url: signedDocs.rent_agreement_url, path: tenant.rent_agreement_path, docType: 'rent_agreement_path' },
+                { label: 'Scooty Insurance', url: signedDocs.scooty_insurance_url, path: tenant.scooty_insurance_path, docType: 'scooty_insurance_path' },
+                { label: 'Rider Insurance', url: signedDocs.rider_insurance_url, path: tenant.rider_insurance_path, docType: 'rider_insurance_path' },
               ].map((item, idx) => (
                 isEditMode ? (
                   <div key={idx} className="mb-4">

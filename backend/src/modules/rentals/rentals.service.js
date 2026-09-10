@@ -260,6 +260,43 @@ class RentalsService {
     if (error) throw error;
     return data;
   }
+
+  async checkUniqueHardwareOrPolicy(fields) {
+    const { chassis_no, motor_ctrl_no, battery_no, scooty_policy_number, rider_policy_number } = fields;
+    
+    // We only need to check fields that were actually provided
+    const orConditions = [];
+    if (chassis_no) orConditions.push(`chassis_no.eq.${chassis_no}`);
+    if (motor_ctrl_no) orConditions.push(`motor_ctrl_no.eq.${motor_ctrl_no}`);
+    if (battery_no) orConditions.push(`battery_no.eq.${battery_no}`);
+    if (scooty_policy_number) orConditions.push(`scooty_policy_number.eq.${scooty_policy_number}`);
+    if (rider_policy_number) orConditions.push(`rider_policy_number.eq.${rider_policy_number}`);
+
+    if (orConditions.length === 0) {
+      return { exists: false };
+    }
+
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('chassis_no, motor_ctrl_no, battery_no, scooty_policy_number, rider_policy_number')
+      .or(orConditions.join(','));
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      // Find which one matched to give a specific error message
+      const conflict = data[0];
+      if (chassis_no && conflict.chassis_no === chassis_no) return { exists: true, message: 'Chassis number already exists in the system.' };
+      if (motor_ctrl_no && conflict.motor_ctrl_no === motor_ctrl_no) return { exists: true, message: 'Motor controller number already exists in the system.' };
+      if (battery_no && conflict.battery_no === battery_no) return { exists: true, message: 'Battery serial number already exists in the system.' };
+      if (scooty_policy_number && conflict.scooty_policy_number === scooty_policy_number) return { exists: true, message: 'Scooty policy number already exists in the system.' };
+      if (rider_policy_number && conflict.rider_policy_number === rider_policy_number) return { exists: true, message: 'Rider policy number already exists in the system.' };
+      
+      return { exists: true, message: 'One of the provided unique identifiers already exists in the system.' };
+    }
+
+    return { exists: false };
+  }
 }
 
 module.exports = new RentalsService();
