@@ -121,7 +121,7 @@ function AdminDashboard() {
         subtitle="Delhi Fleet & Finance Monitoring"
       />
 
-      <div className="p-4 md:p-4 space-y-6 md:space-y-8 max-w-7xl mx-auto pb-6 lg:pb-32">
+      <div className="p-4 md:p-4 space-y-6 md:space-y-8 max-w-7xl mx-auto pb-6">
         {/* KPI Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Available Stock */}
@@ -259,8 +259,9 @@ function AdminDashboard() {
                   <p className="text-xs text-slate-500 dark:text-slate-400">No active tenants are currently overdue.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-white/5">
-                  {overdueTenants.map((tenant) => (
+                <>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[320px] overflow-y-auto pr-1">
+                    {overdueTenants.map((tenant) => (
                     <div
                       key={tenant.id}
                       className="py-3.5 flex items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-white/5 rounded-xl px-2 transition-smooth"
@@ -297,8 +298,17 @@ function AdminDashboard() {
                         </Link>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 text-center">
+                    <Link
+                      href="/rentals?overdue_days=1"
+                      className="text-xs font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors inline-flex items-center"
+                    >
+                      View All Overdue Tenants <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                    </Link>
+                  </div>
+                </>
               )}
             </Card>
           </div>
@@ -329,8 +339,9 @@ function AdminDashboard() {
                   </Link>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-white/5">
-                  {recentRentals.map((r) => (
+                <>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[320px] overflow-y-auto pr-1">
+                    {recentRentals.map((r) => (
                     <div key={r.id} className="py-3 flex items-center justify-between hover:bg-slate-50/70 dark:hover:bg-white/5 rounded-xl px-2 transition-smooth">
                       <div className="min-w-0">
                         <Link
@@ -345,8 +356,17 @@ function AdminDashboard() {
                       </div>
                       <Badge status={r.status} size="sm" />
                     </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 text-center">
+                    <Link
+                      href="/rentals"
+                      className="text-xs font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors inline-flex items-center"
+                    >
+                      View All Rentals <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                    </Link>
+                  </div>
+                </>
               )}
             </Card>
           </div>

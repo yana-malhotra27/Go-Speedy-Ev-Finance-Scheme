@@ -24,8 +24,8 @@ export default function SustainabilityBanner() {
   }, []);
 
   return (
-    <div className="relative w-full lg:w-auto mt-6 px-0 pointer-events-auto lg:fixed lg:bottom-0 lg:left-64 lg:right-0 lg:z-30 lg:pb-4 lg:pointer-events-none lg:mt-0">
-      <div className="w-full max-w-7xl mx-auto lg:px-4 pointer-events-none">
+    <div className="relative w-full mt-8 px-0">
+      <div className="w-full mx-auto">
         <div
           ref={bannerRef}
           className="pointer-events-auto w-full overflow-hidden rounded-2xl bg-gradient-to-r from-white/95 via-blue-50/80 to-emerald-50/60 dark:from-[#081220]/95 dark:via-[#0c1a2f]/95 dark:to-[#071325]/95 backdrop-blur-xl border border-slate-200/90 dark:border-white/10 shadow-lg dark:shadow-[0_8px_30px_rgb(0,0,0,0.55)] text-slate-900 dark:text-white select-none transition-colors duration-300"
