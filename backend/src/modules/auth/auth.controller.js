@@ -84,6 +84,19 @@ class AuthController {
     }
   }
 
+  syncSession(req, res) {
+    try {
+      const { accessToken, refreshToken, userId } = req.body;
+      if (!accessToken || !userId) {
+        return errorResponse(res, 400, 'Invalid session tokens');
+      }
+      this._setCookies(res, accessToken, refreshToken, userId);
+      return successResponse(res, 200, null, 'Session synced');
+    } catch (error) {
+      return errorResponse(res, 500, error.message);
+    }
+  }
+
   _setCookies(res, accessToken, refreshToken, userId) {
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieOpts = {
