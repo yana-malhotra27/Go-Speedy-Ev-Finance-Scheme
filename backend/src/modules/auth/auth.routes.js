@@ -249,6 +249,9 @@ router.get(
         const { accessToken, refreshToken, user } = result;
         const isProduction = env.NODE_ENV === 'production';
         const cookieOpts = { httpOnly: true, secure: isProduction, sameSite: 'lax' };
+        if (env.COOKIE_DOMAIN) {
+          cookieOpts.domain = env.COOKIE_DOMAIN;
+        }
 
         res.cookie('access_token', accessToken, { ...cookieOpts, maxAge: 15 * 60 * 1000 });
         res.cookie('refresh_token', refreshToken, { ...cookieOpts, maxAge: 7 * 24 * 60 * 60 * 1000 });
