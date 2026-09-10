@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import Badge from '../ui/Badge';
+import BrandLogo from '../ui/BrandLogo';
 import { gsap } from '../../lib/gsap';
 
 /**
@@ -146,21 +147,10 @@ function SidebarInner({ isOpen, onClose }) {
   return (
     <aside className="w-64 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 flex flex-col h-full select-none transition-colors">
       {/* Brand Header */}
-      <div className="h-16 shrink-0 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 gap-3">
-        <div
-          ref={logoRef}
-          className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0"
-        >
-          <Zap className="h-5 w-5 fill-current" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-base block leading-none truncate">
-            GO SPEEDY
-          </span>
-          <span className="text-[10px] font-semibold tracking-wider text-blue-600 dark:text-blue-400 uppercase block mt-1 truncate">
-            EV Finance Monitor
-          </span>
-        </div>
+      <div className="h-16 shrink-0 flex items-center px-4 border-b border-slate-100 dark:border-slate-800 justify-between">
+        <Link href="/dashboard" className="flex items-center">
+          <BrandLogo size="sidebar" showText={true} />
+        </Link>
 
         {/* Close button for mobile drawer */}
         <button

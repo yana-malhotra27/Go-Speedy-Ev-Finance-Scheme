@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import ThemeToggle from '../components/ui/ThemeToggle';
+import BrandLogo from '../components/ui/BrandLogo';
 import { useAuthStore } from '../store/authStore';
 import { gsap } from '../lib/gsap';
 import api from '../lib/api';
@@ -35,42 +36,14 @@ const FEATURES = [
 ];
 
 
-/* Brand lock-up: "GoSpeedy" + "EV FLEET FINANCE". `nav` scales up on the desktop split layout.
-   `nav` always sits over the (theme-invariant) hero photo, so it stays white. `lg` sits inside the
-   login card instead, which now follows the page theme, so it needs light/dark text of its own. */
+/* Brand lock-up using BrandLogo */
 function Brand({ size = 'nav' }) {
-  const s =
-    size === 'lg'
-      ? {
-          box: 'w-14 h-14 rounded-2xl',
-          bolt: 'h-6 w-6',
-          name: 'text-[30px]',
-          sub: 'text-[11px] tracking-[0.2em] mt-1',
-          nameColor: 'text-slate-900 dark:text-white',
-          subColor: 'text-slate-500 dark:text-slate-400',
-        }
-      : {
-          box: 'w-9 h-9 rounded-xl desk:w-14 desk:h-14 desk:rounded-2xl',
-          bolt: 'h-[18px] w-[18px] desk:h-6 desk:w-6',
-          name: 'text-[22px] desk:text-[30px]',
-          sub: 'text-[8px] tracking-[0.2em] mt-0.5 desk:text-[11px] desk:mt-1',
-          nameColor: 'text-white',
-          subColor: 'text-slate-400',
-        };
   return (
-    <div className="flex items-center gap-2.5 desk:gap-3">
-      <div
-        className={`${s.box} flex items-center justify-center bg-gradient-to-br from-emerald-400 to-teal-600 shadow-md shadow-emerald-500/25`}
-      >
-        <Zap className={`${s.bolt} fill-white text-white`} />
-      </div>
-      <div className="flex flex-col leading-none">
-        <span className={`${s.name} font-extrabold tracking-tight ${s.nameColor} leading-none`}>
-          Go<span className="text-emerald-400">Speedy</span>
-        </span>
-        <span className={`${s.sub} font-bold ${s.subColor} uppercase`}>EV Fleet Finance</span>
-      </div>
-    </div>
+    <BrandLogo
+      size={size}
+      theme={size === 'nav' ? 'dark' : 'auto'}
+      showText={true}
+    />
   );
 }
 

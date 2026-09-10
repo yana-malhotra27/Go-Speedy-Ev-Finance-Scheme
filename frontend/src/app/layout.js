@@ -4,6 +4,11 @@ import { ThemeProvider } from '../store/themeContext';
 export const metadata = {
   title: 'Go Speedy EV — Rent & Purchase Finance Monitor',
   description: 'Production-grade EV Rent & Purchase Monitor System for Delhi operations.',
+  icons: {
+    icon: '/favicon.png?v=3',
+    shortcut: '/favicon.ico?v=3',
+    apple: '/apple-icon.png?v=3',
+  },
 };
 
 export default function RootLayout({ children }) {
