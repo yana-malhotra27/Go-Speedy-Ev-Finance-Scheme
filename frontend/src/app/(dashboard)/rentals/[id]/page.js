@@ -709,9 +709,9 @@ export default function TenantDetailPage() {
                         value={editData.installment_frequency}
                         onChange={(e) => setEditData({ ...editData, installment_frequency: e.target.value })}
                         options={[
-                          { value: 'daily', label: 'Daily' },
-                          { value: 'weekly', label: 'Weekly' },
-                          { value: 'monthly', label: 'Monthly' },
+                          { value: 'daily', label: `Daily (${formatCurrency(editData.installment_daily_rate)}/day)` },
+                          { value: 'weekly', label: `Weekly (${formatCurrency(editData.installment_daily_rate * 7)}/wk)` },
+                          { value: 'monthly', label: `Monthly (${formatCurrency(editData.installment_daily_rate * 30)}/mo)` },
                         ]}
                       />
                     </div>

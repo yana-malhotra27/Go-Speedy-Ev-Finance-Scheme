@@ -1005,7 +1005,7 @@ export default function NewRentalWizardPage() {
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Installment Plan & Timeline</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Standard collection terms: ₹250/day over 24-month horizon
+                  Collection terms: {formatCurrency(formData.installment_daily_rate)}/day over {formData.total_months}-month horizon
                 </p>
               </div>
 
@@ -1022,7 +1022,11 @@ export default function NewRentalWizardPage() {
                   label="Collection Schedule"
                   value={formData.installment_frequency}
                   onChange={(e) => updateField('installment_frequency', e.target.value)}
-                  options={INSTALLMENT_FREQUENCIES}
+                  options={[
+                    { value: 'daily', label: `Daily (${formatCurrency(formData.installment_daily_rate)}/day)` },
+                    { value: 'weekly', label: `Weekly (${formatCurrency(formData.installment_daily_rate * 7)}/wk)` },
+                    { value: 'monthly', label: `Monthly (${formatCurrency(formData.installment_daily_rate * 30)}/mo)` },
+                  ]}
                   required
                 />
 
