@@ -48,6 +48,52 @@ class AuditService {
       });
     }
 
+    // Resolve target tenant names (from entity_id and changes)
+    const allTenantIds = new Set();
+    data.forEach(row => {
+      if (row.entity_type === 'tenants' && row.entity_id) {
+        allTenantIds.add(row.entity_id);
+      }
+      if (row.changes?.tenant_id && typeof row.changes.tenant_id === 'string') {
+        allTenantIds.add(row.changes.tenant_id);
+      }
+      if (row.changes?.tenant_id?.to) {
+        allTenantIds.add(row.changes.tenant_id.to);
+      }
+      if (row.changes?.tenant_id?.from) {
+        allTenantIds.add(row.changes.tenant_id.from);
+      }
+    });
+
+    const targetTenantIds = [...allTenantIds];
+
+    if (targetTenantIds.length > 0) {
+      const { data: targets, error: targetsError } = await supabase
+        .from('tenants')
+        .select('id, name')
+        .in('id', targetTenantIds);
+
+      if (targetsError) console.error('[Audit] Failed to resolve target tenant names:', targetsError);
+
+      const nameById = new Map((targets || []).map(t => [t.id, t.name]));
+      data.forEach(row => {
+        if (row.entity_type === 'tenants' && row.entity_id) {
+          row.entity_name = nameById.get(row.entity_id) || null;
+        }
+
+        // Replace UUIDs inside changes with actual names
+        if (row.changes?.tenant_id && typeof row.changes.tenant_id === 'string') {
+          const tName = nameById.get(row.changes.tenant_id);
+          if (tName) row.changes.tenant_id = tName;
+        } else if (row.changes?.tenant_id?.to) {
+          const toName = nameById.get(row.changes.tenant_id.to);
+          const fromName = row.changes.tenant_id.from ? nameById.get(row.changes.tenant_id.from) : null;
+          if (toName) row.changes.tenant_id.to = toName;
+          if (fromName) row.changes.tenant_id.from = fromName;
+        }
+      });
+    }
+
     const meta = getPaginationMeta(count, page, limit);
     return { data, meta };
   }

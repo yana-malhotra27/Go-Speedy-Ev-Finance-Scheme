@@ -720,100 +720,102 @@ export default function TenantDetailPage() {
               </>
             )}
 
-            {/* References & Guarantors summary */}
-            <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px] mb-2">References Listed</p>
-                {isEditMode ? (
-                  <div className="space-y-3">
-                    {editData.references.map((r, i) => (
-                      <div key={i} className="space-y-2 mb-4">
-                        <Input
-                          placeholder="Reference Name"
-                          value={r.name || ''}
-                          onChange={(e) => updateReference(i, 'name', e.target.value)}
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                           <Input
-                            placeholder="Phone"
-                            value={r.phone || ''}
-                            onChange={(e) => updateReference(i, 'phone', e.target.value)}
+            {/* Reference & Guarantors summary */}
+            {tenant.status !== 'direct_purchase' && (
+              <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <p className="font-bold text-slate-500 uppercase text-[10px] mb-2">Reference Listed</p>
+                  {isEditMode ? (
+                    <div className="space-y-3">
+                      {editData.references.map((r, i) => (
+                        <div key={i} className="space-y-2 mb-4">
+                          <Input
+                            placeholder="Reference Name"
+                            value={r.name || ''}
+                            onChange={(e) => updateReference(i, 'name', e.target.value)}
                           />
-                          <Select
-                            value={r.category || ''}
-                            onChange={(e) => updateReference(i, 'category', e.target.value)}
-                            options={REFERENCE_CATEGORIES}
-                          />
-                          {r.category === 'other' && (
-                            <Input
-                              placeholder="Please specify category"
-                              value={r.customCategory || ''}
-                              onChange={(e) => updateReference(i, 'customCategory', e.target.value)}
+                          <div className="grid grid-cols-2 gap-2">
+                             <Input
+                              placeholder="Phone"
+                              value={r.phone || ''}
+                              onChange={(e) => updateReference(i, 'phone', e.target.value)}
                             />
-                          )}
+                            <Select
+                              value={r.category || ''}
+                              onChange={(e) => updateReference(i, 'category', e.target.value)}
+                              options={REFERENCE_CATEGORIES}
+                            />
+                            {r.category === 'other' && (
+                              <Input
+                                placeholder="Please specify category"
+                                value={r.customCategory || ''}
+                                onChange={(e) => updateReference(i, 'customCategory', e.target.value)}
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  Array.isArray(tenant.references) && tenant.references.length > 0 ? (
-                    <ul className="space-y-1 text-slate-700 dark:text-slate-300">
-                      {tenant.references.map((r, i) => (
-                        <li key={i}>
-                          <span className="font-semibold">{r.name}</span> ({r.category}) — {r.phone}
-                        </li>
                       ))}
-                    </ul>
+                    </div>
                   ) : (
-                    <p className="text-slate-400">None provided</p>
-                  )
-                )}
-              </div>
+                    Array.isArray(tenant.references) && tenant.references.length > 0 ? (
+                      <ul className="space-y-1 text-slate-700 dark:text-slate-300">
+                        {tenant.references.map((r, i) => (
+                          <li key={i}>
+                            <span className="font-semibold">{r.name}</span> ({r.category}) — {r.phone}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-slate-400">None provided</p>
+                    )
+                  )}
+                </div>
 
-              <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px] mb-2">Guarantors</p>
-                {isEditMode ? (
-                  <div className="space-y-3">
-                    {editData.guarantors.map((g, i) => (
-                      <div key={i} className="space-y-2 mb-4">
-                        <Input
-                          placeholder="Guarantor Name"
-                          value={g.name || ''}
-                          onChange={(e) => updateGuarantor(i, 'name', e.target.value)}
-                        />
-                         <div className="grid grid-cols-2 gap-2">
-                           <Input
-                            placeholder="Phone"
-                            value={g.phone || ''}
-                            onChange={(e) => updateGuarantor(i, 'phone', e.target.value)}
+                <div>
+                  <p className="font-bold text-slate-500 uppercase text-[10px] mb-2">Guarantors</p>
+                  {isEditMode ? (
+                    <div className="space-y-3">
+                      {editData.guarantors.map((g, i) => (
+                        <div key={i} className="space-y-2 mb-4">
+                          <Input
+                            placeholder="Guarantor Name"
+                            value={g.name || ''}
+                            onChange={(e) => updateGuarantor(i, 'name', e.target.value)}
                           />
-                          <Select
-                            value={g.gender || ''}
-                            onChange={(e) => updateGuarantor(i, 'gender', e.target.value)}
-                            options={[
-                              { value: 'male', label: 'Male' },
-                              { value: 'female', label: 'Female' }
-                            ]}
-                          />
+                           <div className="grid grid-cols-2 gap-2">
+                             <Input
+                              placeholder="Phone"
+                              value={g.phone || ''}
+                              onChange={(e) => updateGuarantor(i, 'phone', e.target.value)}
+                            />
+                            <Select
+                              value={g.gender || ''}
+                              onChange={(e) => updateGuarantor(i, 'gender', e.target.value)}
+                              options={[
+                                { value: 'male', label: 'Male' },
+                                { value: 'female', label: 'Female' }
+                              ]}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  Array.isArray(tenant.guarantors) && tenant.guarantors.length > 0 ? (
-                    <ul className="space-y-1 text-slate-700 dark:text-slate-300">
-                      {tenant.guarantors.map((g, i) => (
-                        <li key={i}>
-                          <span className="font-semibold">{g.name}</span> ({g.gender}) — {g.phone}
-                        </li>
                       ))}
-                    </ul>
+                    </div>
                   ) : (
-                    <p className="text-slate-400">None provided</p>
-                  )
-                )}
+                    Array.isArray(tenant.guarantors) && tenant.guarantors.length > 0 ? (
+                      <ul className="space-y-1 text-slate-700 dark:text-slate-300">
+                        {tenant.guarantors.map((g, i) => (
+                          <li key={i}>
+                            <span className="font-semibold">{g.name}</span> ({g.gender}) — {g.phone}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-slate-400">None provided</p>
+                    )
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </Card>
 
           {/* Documents Vault */}

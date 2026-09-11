@@ -43,8 +43,6 @@ const ALL_STEPS = [
   { id: 3, name: 'Documents', icon: FileText },
   { id: 4, name: 'Scooty HW', icon: Cpu },
   { id: 5, name: 'Insurance', icon: ShieldCheck },
-  { id: 6, name: 'References', icon: Users2 },
-  { id: 7, name: 'Guarantors', icon: ShieldAlert },
 ];
 
 export default function NewPurchaseWizardPage() {
@@ -195,30 +193,6 @@ export default function NewPurchaseWizardPage() {
       }
       if (!formData.rider_insurance_company.trim() || !formData.rider_policy_number.trim() || !formData.rider_policy_expiry) {
         setErrorMessage('All Rider insurance details are required');
-        return false;
-      }
-    }
-    if (step === 6) {
-      const missingRef = formData.references.some(r => !r.category || !r.name.trim() || !r.area.trim() || !r.phone.trim());
-      if (missingRef) {
-        setErrorMessage('All reference details are required');
-        return false;
-      }
-      const invalidRefPhone = formData.references.some(r => !/^\d{10}$/.test(r.phone.trim()));
-      if (invalidRefPhone) {
-        setErrorMessage('All reference phone numbers must be exactly 10 digits');
-        return false;
-      }
-    }
-    if (step === 7) {
-      const missingGuarantor = formData.guarantors.some(g => !g.gender || !g.name.trim() || !g.address.trim() || !g.phone.trim());
-      if (missingGuarantor) {
-        setErrorMessage('All guarantor details are required');
-        return false;
-      }
-      const invalidGuarantorPhone = formData.guarantors.some(g => !/^\d{10}$/.test(g.phone.trim()));
-      if (invalidGuarantorPhone) {
-        setErrorMessage('All guarantor phone numbers must be exactly 10 digits');
         return false;
       }
     }
@@ -745,98 +719,9 @@ export default function NewPurchaseWizardPage() {
             </div>
           )}
 
-          {/* STEP 6: 3 REFERENCES */}
-          {currentStep === 6 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">3 Notable References</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  DSGMC Member, Nigam Parshad, MLA or respected community references
-                </p>
-              </div>
 
-              <div className="space-y-3">
-                {formData.references.map((ref, idx) => (
-                  <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <Select
-                      label={`Reference #${idx + 1} Category`}
-                      value={ref.category}
-                      onChange={(e) => updateReference(idx, 'category', e.target.value)}
-                      options={REFERENCE_CATEGORIES}
-                      required
-                    />
-                    <Input
-                      label="Full Name"
-                      placeholder="Name"
-                      value={ref.name}
-                      onChange={(e) => updateReference(idx, 'name', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Ward / Area"
-                      placeholder="e.g. Ward 42"
-                      value={ref.area}
-                      onChange={(e) => updateReference(idx, 'area', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Mobile Phone"
-                      placeholder="Phone"
-                      value={ref.phone}
-                      onChange={(e) => updateReference(idx, 'phone', e.target.value)}
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* STEP 7: 2 GUARANTORS */}
-          {currentStep === 7 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">2 Co-Signer Guarantors</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  1 Male and 1 Female guarantor mandatory per policy
-                </p>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {formData.guarantors.map((g, idx) => (
-                  <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                        Guarantor #{idx + 1} ({g.gender.toUpperCase()})
-                      </span>
-                    </div>
-
-                    <Input
-                      label="Full Name"
-                      placeholder="Name"
-                      value={g.name}
-                      onChange={(e) => updateGuarantor(idx, 'name', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Mobile Phone"
-                      placeholder="10-digit number"
-                      value={g.phone}
-                      onChange={(e) => updateGuarantor(idx, 'phone', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Address"
-                      placeholder="Residential Address"
-                      value={g.address}
-                      onChange={(e) => updateGuarantor(idx, 'address', e.target.value)}
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Wizard Footer Controls */}
           <div className="flex items-center justify-between border-t border-slate-100 pt-5 mt-6">

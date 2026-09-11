@@ -46,7 +46,7 @@ const ALL_STEPS = [
   { id: 4, name: 'Scooty HW', icon: Cpu },
   { id: 5, name: 'Insurance', icon: ShieldCheck },
   { id: 6, name: 'Downpayment', icon: IndianRupee },
-  { id: 7, name: 'References', icon: Users2 },
+  { id: 7, name: 'Reference', icon: Users2 },
   { id: 8, name: 'Guarantors', icon: ShieldAlert },
   { id: 9, name: 'Installments', icon: Calendar },
 ];
@@ -114,7 +114,7 @@ export default function NewRentalWizardPage() {
     dp_other_name: '',
     dp_other_phone: '',
 
-    // Step 6: 3 References
+    // Step 6: 1 Reference
     references: [
       { category: '', name: '', area: '', phone: '' },
     ],
@@ -233,12 +233,12 @@ export default function NewRentalWizardPage() {
     if (step === 7) {
       const missingRef = formData.references.some(r => !r.category || !r.name.trim() || !r.area.trim() || !r.phone.trim());
       if (missingRef) {
-        setErrorMessage('All reference details are required');
+        setErrorMessage('Reference details are required');
         return false;
       }
       const invalidRefPhone = formData.references.some(r => !/^\d{10}$/.test(r.phone.trim()));
       if (invalidRefPhone) {
-        setErrorMessage('All reference phone numbers must be exactly 10 digits');
+        setErrorMessage('Reference phone number must be exactly 10 digits');
         return false;
       }
     }
@@ -896,22 +896,22 @@ export default function NewRentalWizardPage() {
             </div>
           )}
 
-          {/* STEP 7: 3 REFERENCES */}
+          {/* STEP 7: REFERENCE */}
           {currentStep === 7 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">3 Notable References</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Notable Reference</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  DSGMC Member, Nigam Parshad, MLA or respected community references
+                  DSGMC Member, Nigam Parshad, MLA or respected community reference
                 </p>
               </div>
 
               <div className="space-y-3">
                 {formData.references.map((ref, idx) => (
-                  <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div className="space-y-2">
+                  <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="sm:col-span-1 space-y-2">
                       <Select
-                        label={`Reference #${idx + 1} Category`}
+                        label="Reference Category"
                         value={ref.category}
                         onChange={(e) => updateReference(idx, 'category', e.target.value)}
                         options={REFERENCE_CATEGORIES}
