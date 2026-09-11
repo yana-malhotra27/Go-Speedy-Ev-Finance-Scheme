@@ -104,7 +104,7 @@ class AuthController {
     const cookieOpts = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
     };
     
     // Access token - 15 mins

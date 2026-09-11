@@ -325,7 +325,7 @@ router.post('/oauth/exchange', (req, res) => {
 
   const { accessToken, refreshToken, userId } = entry;
   const isProduction = env.NODE_ENV === 'production';
-  const cookieOpts = { httpOnly: true, secure: isProduction, sameSite: 'lax' };
+  const cookieOpts = { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax' };
   if (env.COOKIE_DOMAIN) cookieOpts.domain = env.COOKIE_DOMAIN;
 
   res.cookie('access_token', accessToken, { ...cookieOpts, maxAge: 15 * 60 * 1000 });
