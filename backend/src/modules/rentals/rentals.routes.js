@@ -28,6 +28,8 @@ const createRentalSchema = z.object({
   start_date: z.string().optional(),
   total_months: z.number().min(0).optional(),
   status: z.string().optional(),
+  include_gst: z.boolean().optional(),
+  gst_percent: z.number().min(0).optional(),
   references: z.array(z.object({
     category: z.string().min(1),
     name: z.string().min(1),

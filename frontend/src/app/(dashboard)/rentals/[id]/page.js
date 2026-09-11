@@ -109,6 +109,8 @@ export default function TenantDetailPage() {
           start_date: t.start_date ? t.start_date.split('T')[0] : '',
           installment_daily_rate: t.installment_daily_rate || '',
           installment_frequency: t.installment_frequency || '',
+          include_gst: t.include_gst || false,
+          gst_percent: t.gst_percent || 0,
           references: Array.isArray(t.references) ? t.references : [],
           guarantors: Array.isArray(t.guarantors) ? t.guarantors : [],
           notes: t.notes || '',
@@ -148,6 +150,7 @@ export default function TenantDetailPage() {
         payment_date: paymentDate,
         mode: paymentMode,
         notes: paymentNotes || null,
+        gst_amount: tenant.include_gst ? ((Number(paymentAmount) || 0) * (tenant.gst_percent || 0)) / 100 : 0,
       });
 
       if (res.data?.success) {
@@ -716,6 +719,64 @@ export default function TenantDetailPage() {
                       />
                     </div>
                   )}
+
+                  <div className="sm:col-span-2 mt-4 pt-4 border-t border-slate-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        {isEditMode ? (
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editData.include_gst}
+                              onChange={(e) => {
+                                setEditData({ ...editData, include_gst: e.target.checked, gst_percent: e.target.checked ? editData.gst_percent : 0 });
+                              }}
+                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span>Include GST</span>
+                          </label>
+                        ) : (
+                          <>
+                            <p className="font-bold text-slate-400 uppercase text-[10px]">GST Included</p>
+                            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-0.5">
+                              {tenant.include_gst ? 'Yes' : 'No'}
+                            </p>
+                          </>
+                        )}
+                      </div>
+
+                      {(isEditMode ? editData.include_gst : tenant.include_gst) && (
+                        <div>
+                          {isEditMode ? (
+                            <div className="flex gap-4">
+                              <Input
+                                type="number"
+                                label="Tax Percent (%)"
+                                min="0"
+                                value={editData.gst_percent}
+                                onChange={(e) => setEditData({ ...editData, gst_percent: parseFloat(e.target.value) || 0 })}
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                                  GST Amount
+                                </span>
+                                <div className="flex items-center h-10 px-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                  ₹{((editData.installment_daily_rate * (editData.gst_percent || 0)) / 100).toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="font-bold text-slate-400 uppercase text-[10px]">GST Details</p>
+                              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-0.5">
+                                {tenant.gst_percent}% (₹{((tenant.installment_daily_rate * (tenant.gst_percent || 0)) / 100).toFixed(2)} per installment)
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </>
             )}
@@ -904,6 +965,7 @@ export default function TenantDetailPage() {
                     <tr>
                       <th className="px-4 py-3">Date</th>
                       <th className="px-4 py-3">Amount</th>
+                      <th className="px-4 py-3">GST</th>
                       <th className="px-4 py-3">Mode</th>
                       <th className="px-4 py-3">Collected By</th>
                       <th className="px-4 py-3">Notes</th>
@@ -917,6 +979,9 @@ export default function TenantDetailPage() {
                         </td>
                         <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">
                           {formatCurrency(p.amount)}
+                        </td>
+                        <td className="px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                          {p.gst_amount && Number(p.gst_amount) > 0 ? formatCurrency(p.gst_amount) : '—'}
                         </td>
                         <td className="px-4 py-3">
                           <Badge status={p.mode} size="sm" />
@@ -950,14 +1015,26 @@ export default function TenantDetailPage() {
             </div>
           )}
 
-          <Input
-            label="Amount Collected (₹)"
-            type="number"
-            placeholder="250"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(e.target.value)}
-            required
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Principal Amount Collected (₹)"
+              type="number"
+              placeholder="250"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              required
+            />
+            {tenant?.include_gst && (
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                  GST Amount (+{tenant.gst_percent}%)
+                </span>
+                <div className="flex items-center h-10 px-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  ₹{(((Number(paymentAmount) || 0) * (tenant.gst_percent || 0)) / 100).toFixed(2)}
+                </div>
+              </div>
+            )}
+          </div>
 
           <Input
             label="Payment Date"

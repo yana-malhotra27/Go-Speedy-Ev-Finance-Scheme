@@ -161,7 +161,6 @@ class RentalsService {
           total_price: model.total_price, // snapshot price
           start_date: tenantData.status === 'direct_purchase' ? null : startDate.toISOString().split('T')[0],
           expected_end_date: tenantData.status === 'direct_purchase' ? null : expectedEndDate.toISOString().split('T')[0],
-          balance_outstanding: tenantData.status === 'direct_purchase' ? 0 : model.total_price - (tenantData.downpayment_paid || 0),
           created_by: createdBy
         }])
         .select('*')

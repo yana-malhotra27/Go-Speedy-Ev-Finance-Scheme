@@ -133,6 +133,8 @@ export default function NewRentalWizardPage() {
     installment_other_phone: '',
     start_date: new Date().toISOString().split('T')[0],
     total_months: 24,
+    include_gst: false,
+    gst_percent: 0,
 
     // Optional booking linkage
     booking_id: searchParams.get('booking_id') || '',
@@ -1046,6 +1048,41 @@ export default function NewRentalWizardPage() {
                   value={formData.start_date}
                   onChange={(e) => updateField('start_date', e.target.value)}
                 />
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer mb-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.include_gst}
+                    onChange={(e) => {
+                      updateField('include_gst', e.target.checked);
+                      if (!e.target.checked) updateField('gst_percent', 0);
+                    }}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Include GST</span>
+                </label>
+
+                {formData.include_gst && (
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <Input
+                      label="Tax Percent (%)"
+                      type="number"
+                      min="0"
+                      value={formData.gst_percent}
+                      onChange={(e) => updateField('gst_percent', parseFloat(e.target.value) || 0)}
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                        GST Amount (per installment)
+                      </span>
+                      <div className="flex items-center h-10 px-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        ₹{((formData.installment_daily_rate * (formData.gst_percent || 0)) / 100).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 border-t border-slate-100">
