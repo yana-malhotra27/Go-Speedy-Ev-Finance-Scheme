@@ -823,19 +823,23 @@ export default function NewRentalWizardPage() {
               </div>
 
               {selectedModel && (
-                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-white/10 grid grid-cols-3 gap-4 text-center">
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-white/10 grid grid-cols-4 gap-4 text-center">
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase">Sticker Price</span>
                     <p className="text-base font-black text-slate-900 dark:text-white">{formatCurrency(selectedModel.total_price)}</p>
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase">Advance Booking</span>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Booking Token</span>
                     <p className="text-base font-black text-emerald-600">-{formatCurrency(formData.booking_amount)}</p>
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase">Contract Net</span>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Downpayment</span>
+                    <p className="text-base font-black text-emerald-600">-{formatCurrency(formData.downpayment_paid)}</p>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Balance to Pay</span>
                     <p className="text-base font-black text-blue-600">
-                      {formatCurrency(selectedModel.total_price - formData.booking_amount)}
+                      {formatCurrency(selectedModel.total_price - Number(formData.booking_amount || 0) - Number(formData.downpayment_paid || 0))}
                     </p>
                   </div>
                 </div>
