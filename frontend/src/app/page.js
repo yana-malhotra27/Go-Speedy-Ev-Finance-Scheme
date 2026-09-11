@@ -215,7 +215,7 @@ export default function RootPage() {
       setSubmitting(true);
       const res = await login(identifier.trim(), password);
       if (res && res.success) {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       } else {
         setError(res?.error || 'Wrong password! Please check your password and try again.');
       }
