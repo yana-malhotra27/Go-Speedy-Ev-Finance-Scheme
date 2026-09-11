@@ -33,10 +33,20 @@ class AuthController {
 
       return successResponse(res, 200, { user: result.user }, 'Token refreshed');
     } catch (error) {
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieOpts = {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+      };
+      if (process.env.COOKIE_DOMAIN) {
+        cookieOpts.domain = process.env.COOKIE_DOMAIN;
+      }
+      
       // Clear cookies on fail
-      res.clearCookie('access_token');
-      res.clearCookie('refresh_token');
-      res.clearCookie('user_id');
+      res.clearCookie('access_token', cookieOpts);
+      res.clearCookie('refresh_token', cookieOpts);
+      res.clearCookie('user_id', cookieOpts);
       return errorResponse(res, 401, 'Session expired or invalid');
     }
   }
@@ -49,10 +59,20 @@ class AuthController {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieOpts = {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+      };
+      if (process.env.COOKIE_DOMAIN) {
+        cookieOpts.domain = process.env.COOKIE_DOMAIN;
+      }
+      
       // Always clear cookies
-      res.clearCookie('access_token');
-      res.clearCookie('refresh_token');
-      res.clearCookie('user_id');
+      res.clearCookie('access_token', cookieOpts);
+      res.clearCookie('refresh_token', cookieOpts);
+      res.clearCookie('user_id', cookieOpts);
       return successResponse(res, 200, null, 'Logged out successfully');
     }
   }
@@ -102,7 +122,7 @@ class AuthController {
     const cookieOpts = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'lax',
     };
 
     if (process.env.COOKIE_DOMAIN) {
