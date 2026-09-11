@@ -181,7 +181,7 @@ function AdminDashboard() {
               <h3 id="gsap-admin-collections" className="text-2xl font-black text-slate-900 dark:text-white mt-1">
                 {loading ? <Spinner size="sm" /> : formatCurrency(stats.totalCollections)}
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">Recorded to date</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">Recorded to date (not including GST)</p>
             </div>
             <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
               <IndianRupee className="h-6 w-6" />
