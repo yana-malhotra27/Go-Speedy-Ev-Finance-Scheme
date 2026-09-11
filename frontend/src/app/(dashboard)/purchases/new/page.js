@@ -99,16 +99,7 @@ export default function NewPurchaseWizardPage() {
     date_of_purchase: new Date().toISOString().split('T')[0],
     date_of_delivery: new Date().toISOString().split('T')[0],
 
-    // Step 6: 3 References
-    references: [
-      { category: '', name: '', area: '', phone: '' },
-    ],
 
-    // Step 7: 2 Guarantors (1 Male + 1 Female mandatory)
-    guarantors: [
-      { gender: 'male', name: '', address: '', phone: '' },
-      { gender: 'female', name: '', address: '', phone: '' },
-    ],
 
     // Optional booking linkage
     booking_id: searchParams.get('booking_id') || '',
