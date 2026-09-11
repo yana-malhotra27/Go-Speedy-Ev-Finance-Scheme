@@ -52,6 +52,7 @@ export const HP_FINANCERS = [
   { value: 'go_speedy', label: 'Go Speedy' },
   { value: 'swastik_finance', label: 'Swastik Finance' },
   { value: 'akasa_finance', label: 'Akasa Finance' },
+  { value: 'other', label: 'Other (Specify)' },
 ];
 
 export const formatCurrency = (val) => {

@@ -97,6 +97,7 @@ export default function NewPurchaseWizardPage() {
     battery_no: '',
     rto_type: 'rto',
     hp_financer: 'go_speedy',
+    hp_financer_other: '',
     date_of_purchase: new Date().toISOString().split('T')[0],
     date_of_delivery: new Date().toISOString().split('T')[0],
 
@@ -309,9 +310,10 @@ export default function NewPurchaseWizardPage() {
     setErrorMessage('');
 
     try {
-      const { booking_id, isDirectPurchase: _, ...restFormData } = formData;
+      const { booking_id, isDirectPurchase: _, hp_financer_other, ...restFormData } = formData;
       const payload = {
         ...restFormData,
+        hp_financer: formData.hp_financer === 'other' ? (hp_financer_other || 'Other') : formData.hp_financer,
         has_pending_docs: hasPendingDocs,
         booking_amount: 0,
         downpayment_paid: 0,
@@ -645,6 +647,15 @@ export default function NewPurchaseWizardPage() {
                   options={HP_FINANCERS}
                   required
                 />
+                {formData.hp_financer === 'other' && (
+                  <Input
+                    label="Custom Financer"
+                    placeholder="Enter custom financer name"
+                    value={formData.hp_financer_other}
+                    onChange={(e) => updateField('hp_financer_other', e.target.value)}
+                    required
+                  />
+                )}
 
                 <Input
                   label="Date of Purchase"

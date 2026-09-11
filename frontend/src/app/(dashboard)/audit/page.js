@@ -21,9 +21,12 @@ const ACTION_LABELS = {
   CREATE_RENTAL:     'Created a new rental agreement',
   UPDATE_RENTAL:     'Updated rental details',
   DELETE_RENTAL:     'Deleted a rental agreement',
+  CANCEL_RENTAL:     'Cancelled a rental agreement',
+  COMPLETE_RENTAL:   'Completed a rental agreement',
   CREATE_BOOKING:    'Created a new booking',
   UPDATE_BOOKING:    'Updated booking details',
   DELETE_BOOKING:    'Deleted a booking',
+  CANCEL_BOOKING:    'Cancelled a booking',
   CONVERT_BOOKING:   'Converted booking to a purchase',
   RECORD_PAYMENT:    'Recorded a payment',
   UPDATE_PAYMENT:    'Updated payment details',
@@ -138,7 +141,7 @@ function ChangeDiff({ changes, isExpanded, onToggle, targetName }) {
       </button>
 
       {isExpanded && (
-        <div className="mt-3 space-y-2 max-w-sm">
+        <div className="mt-3 space-y-2 w-full max-w-lg">
           {keys.map(key => {
             const entry = changes[key];
             const hasFromTo = entry && typeof entry === 'object' && ('from' in entry || 'to' in entry);
@@ -239,8 +242,9 @@ export default function AuditPage() {
     {
       header: 'When',
       key: 'created_at',
+      className: 'w-[20%] min-w-[140px]',
       render: (row) => (
-        <div className="flex items-start justify-center gap-1.5 text-left">
+        <div className="flex items-start justify-start gap-1.5 text-left">
           <Clock className="h-3.5 w-3.5 text-slate-400 mt-0.5 shrink-0" />
           <div>
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
@@ -256,14 +260,22 @@ export default function AuditPage() {
     {
       header: 'Done By',
       key: 'user',
+      className: 'w-[25%] min-w-[180px]',
       render: (row) => (
-        <div className="flex items-center justify-center gap-2 text-left">
+        <div className="flex items-center justify-start gap-2 text-left">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
             <User className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">{row.users?.name || 'System'}</p>
-            <p className="text-[10px] text-slate-400 capitalize">{row.user_role}</p>
+            <p className="text-[10px] text-slate-400 capitalize">
+              {row.user_role}
+              {row.users?.ward_area && (
+                <span className="ml-1 pl-1 border-l border-slate-300 dark:border-slate-600">
+                  {row.users.ward_area}
+                </span>
+              )}
+            </p>
           </div>
         </div>
       ),
@@ -271,6 +283,7 @@ export default function AuditPage() {
     {
       header: 'What Happened',
       key: 'action',
+      className: 'w-[45%] min-w-[350px]',
       render: (row) => {
         // Skip the " — name" suffix when the actor acted on themselves (e.g. a
         // self-service forgot-password reset) — "Done By" already shows that name,
@@ -299,6 +312,7 @@ export default function AuditPage() {
     {
       header: 'Section',
       key: 'entity_type',
+      className: 'w-[10%] min-w-[100px]',
       render: (row) => (
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300">
           {ENTITY_LABELS[row.entity_type] || row.entity_type?.replace(/_/g, ' ')}

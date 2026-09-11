@@ -7,7 +7,7 @@ class AuditService {
     
     let queryBuilder = supabase
       .from('audit_logs')
-      .select('*, users(name, email)', { count: 'exact' });
+      .select('*, users(name, email, ward_area)', { count: 'exact' });
 
     if (query.user_id) queryBuilder = queryBuilder.eq('user_id', query.user_id);
     if (query.action) queryBuilder = queryBuilder.eq('action', query.action);

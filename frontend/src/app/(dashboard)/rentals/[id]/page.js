@@ -93,6 +93,7 @@ export default function TenantDetailPage() {
 
       if (tenantRes.data?.success) {
         const t = tenantRes.data.data;
+        const isStandardFinancer = HP_FINANCERS.some(f => f.value === t.hp_financer && f.value !== 'other');
         setTenant(t);
         setEditData({
           name: t.name || '',
@@ -103,7 +104,8 @@ export default function TenantDetailPage() {
           battery_no: t.battery_no || '',
           date_of_purchase: t.date_of_purchase ? t.date_of_purchase.split('T')[0] : '',
           rto_type: t.rto_type || '',
-          hp_financer: t.hp_financer || '',
+          hp_financer: t.hp_financer ? (isStandardFinancer ? t.hp_financer : 'other') : '',
+          hp_financer_other: isStandardFinancer ? '' : (t.hp_financer === 'other' ? '' : (t.hp_financer || '')),
           start_date: t.start_date ? t.start_date.split('T')[0] : '',
           installment_daily_rate: t.installment_daily_rate || '',
           installment_frequency: t.installment_frequency || '',
@@ -204,8 +206,10 @@ export default function TenantDetailPage() {
   const handleSaveChanges = async () => {
     try {
       setIsSaving(true);
+      const { hp_financer_other, ...restEditData } = editData;
       const payload = {
-        ...editData,
+        ...restEditData,
+        hp_financer: editData.hp_financer === 'other' ? (hp_financer_other || 'Other') : editData.hp_financer,
         references: (editData.references || []).map(({ customCategory, ...r }) => ({
           ...r,
           category: r.category === 'other' ? (customCategory || 'Other') : r.category,
@@ -514,12 +518,24 @@ export default function TenantDetailPage() {
 
               <div>
                 {isEditMode ? (
-                  <Select
-                    label="HP Financer"
-                    value={editData.hp_financer}
-                    onChange={(e) => setEditData({ ...editData, hp_financer: e.target.value })}
-                    options={HP_FINANCERS}
-                  />
+                  <>
+                    <Select
+                      label="HP Financer"
+                      value={editData.hp_financer}
+                      onChange={(e) => setEditData({ ...editData, hp_financer: e.target.value })}
+                      options={HP_FINANCERS}
+                    />
+                    {editData.hp_financer === 'other' && (
+                      <div className="mt-4">
+                        <Input
+                          label="Custom Financer"
+                          placeholder="Enter custom financer name"
+                          value={editData.hp_financer_other || ''}
+                          onChange={(e) => setEditData({ ...editData, hp_financer_other: e.target.value })}
+                        />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <p className="font-bold text-slate-400 uppercase text-[10px]">HP Financer</p>

@@ -44,7 +44,7 @@ export default function Table({
               <th
                 key={col.key || idx}
                 scope="col"
-                className={`px-3 md:px-4 py-3 md:py-4 text-center ${col.className || ''}`}
+                className={`px-3 md:px-4 py-3 md:py-4 text-left ${col.className || ''}`}
               >
                 {col.header}
               </th>
@@ -80,7 +80,7 @@ export default function Table({
                 {columns.map((col, colIdx) => (
                   <td
                     key={col.key || colIdx}
-                    className={`px-3 md:px-4 py-3 md:py-4 text-center align-middle ${col.cellClassName || ''}`}
+                    className={`px-3 md:px-4 py-3 md:py-4 text-left align-middle ${col.cellClassName || ''}`}
                   >
                     {col.render ? col.render(row) : row[col.key]}
                   </td>

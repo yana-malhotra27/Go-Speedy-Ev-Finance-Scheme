@@ -95,6 +95,7 @@ export default function NewRentalWizardPage() {
     battery_no: '',
     rto_type: 'rto',
     hp_financer: 'go_speedy',
+    hp_financer_other: '',
     date_of_purchase: new Date().toISOString().split('T')[0],
     date_of_delivery: new Date().toISOString().split('T')[0],
     scooty_insurance_company: '',
@@ -347,9 +348,10 @@ export default function NewRentalWizardPage() {
     setErrorMessage('');
 
     try {
-      const { booking_id, isDirectPurchase: _, ...restFormData } = formData;
+      const { booking_id, isDirectPurchase: _, hp_financer_other, ...restFormData } = formData;
       const payload = {
         ...restFormData,
+        hp_financer: formData.hp_financer === 'other' ? (hp_financer_other || 'Other') : formData.hp_financer,
         references: formData.references.map(r => ({
           category: r.category === 'other' ? (r.customCategory || 'Other') : r.category,
           name: r.name,
@@ -694,12 +696,21 @@ export default function NewRentalWizardPage() {
                 />
 
                 <Select
-                  label="HP Financer"
+                  label="Financer"
                   value={formData.hp_financer}
                   onChange={(e) => updateField('hp_financer', e.target.value)}
                   options={HP_FINANCERS}
                   required
                 />
+                {formData.hp_financer === 'other' && (
+                  <Input
+                    label="Custom Financer"
+                    placeholder="Enter custom financer name"
+                    value={formData.hp_financer_other}
+                    onChange={(e) => updateField('hp_financer_other', e.target.value)}
+                    required
+                  />
+                )}
 
                 <Input
                   label="Date of Purchase"
