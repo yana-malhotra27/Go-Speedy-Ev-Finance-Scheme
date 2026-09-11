@@ -33,11 +33,12 @@ class AuthController {
 
       return successResponse(res, 200, { user: result.user }, 'Token refreshed');
     } catch (error) {
+      console.error('Refresh Token Error:', error.message);
       // Clear cookies on fail
       res.clearCookie('access_token');
       res.clearCookie('refresh_token');
       res.clearCookie('user_id');
-      return errorResponse(res, 401, 'Session expired or invalid');
+      return errorResponse(res, 401, `Session expired or invalid: ${error.message}`);
     }
   }
 
