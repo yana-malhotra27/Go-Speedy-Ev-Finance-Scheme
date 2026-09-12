@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   rent_agreement_path   TEXT,
   scooty_insurance_path TEXT,
   rider_insurance_path  TEXT,
+  rider_license_path    TEXT,
 
   -- Scooty hardware
   chassis_no    TEXT,

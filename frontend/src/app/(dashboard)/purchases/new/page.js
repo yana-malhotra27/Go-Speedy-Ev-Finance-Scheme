@@ -87,6 +87,7 @@ export default function NewPurchaseWizardPage() {
     invoice_doc_path: '',
     scooty_insurance_path: '',
     rider_insurance_path: '',
+    rider_license_path: '',
     amc_doc_path: '',
 
     // Step 4: Scooty Hardware
@@ -295,6 +296,7 @@ export default function NewPurchaseWizardPage() {
       { key: 'invoice_doc_path', label: 'Invoice Document' },
       { key: 'scooty_insurance_path', label: 'Scooty Insurance Photo' },
       { key: 'rider_insurance_path', label: 'Rider Insurance Photo' },
+      { key: 'rider_license_path', label: 'Rider License' },
     ];
 
     const missing = docLabels
@@ -594,6 +596,12 @@ export default function NewPurchaseWizardPage() {
                   docType="rider_insurance_path"
                   currentPath={formData.rider_insurance_path}
                   onUploaded={(path) => updateField('rider_insurance_path', path)}
+                />
+                <FileUpload
+                  label="Rider License"
+                  docType="rider_license_path"
+                  currentPath={formData.rider_license_path}
+                  onUploaded={(path) => updateField('rider_license_path', path)}
                 />
                 <FileUpload
                   label="AMC Document"

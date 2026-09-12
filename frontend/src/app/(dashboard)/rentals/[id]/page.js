@@ -1179,6 +1179,7 @@ export default function TenantDetailPage() {
                   : { label: 'Rent Agreement', url: signedDocs.rent_agreement_url, path: tenant.rent_agreement_path, docType: 'rent_agreement_path' },
                 { label: 'Scooty Insurance', url: signedDocs.scooty_insurance_url, path: tenant.scooty_insurance_path, docType: 'scooty_insurance_path' },
                 { label: 'Rider Insurance', url: signedDocs.rider_insurance_url, path: tenant.rider_insurance_path, docType: 'rider_insurance_path' },
+                { label: 'Rider License', url: signedDocs.rider_license_url, path: tenant.rider_license_path, docType: 'rider_license_path' },
                 { label: 'AMC Document', url: signedDocs.amc_doc_url, path: tenant.amc_doc_path, docType: 'amc_doc_path' },
               ].map((item, idx) => (
                 isEditMode ? (

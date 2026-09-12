@@ -91,6 +91,7 @@ export default function NewRentalWizardPage() {
     rent_agreement_path: '',
     scooty_insurance_path: '',
     rider_insurance_path: '',
+    rider_license_path: '',
     amc_doc_path: '',
 
     // Step 4: Scooty Hardware
@@ -356,6 +357,7 @@ export default function NewRentalWizardPage() {
       { key: 'rent_agreement_path', label: 'Rent Agreement Photo' },
       { key: 'scooty_insurance_path', label: 'Scooty Insurance Policy' },
       { key: 'rider_insurance_path', label: 'Rider Insurance Policy' },
+      { key: 'rider_license_path', label: 'Rider License' },
     ];
 
     const missing = docLabels
@@ -673,6 +675,12 @@ export default function NewRentalWizardPage() {
                   docType="rider_insurance_path"
                   currentPath={formData.rider_insurance_path}
                   onUploaded={(path) => updateField('rider_insurance_path', path)}
+                />
+                <FileUpload
+                  label="Rider License"
+                  docType="rider_license_path"
+                  currentPath={formData.rider_license_path}
+                  onUploaded={(path) => updateField('rider_license_path', path)}
                 />
                 <FileUpload
                   label="AMC Document"

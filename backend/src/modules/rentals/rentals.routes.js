@@ -51,6 +51,7 @@ const createRentalSchema = z.object({
   rent_agreement_path: z.string().optional(),
   scooty_insurance_path: z.string().optional(),
   rider_insurance_path: z.string().optional(),
+  rider_license_path: z.string().optional(),
   scooty_insurance_company: z.string().min(1, 'Scooty Insurance Company is required'),
   scooty_policy_number: z.string().min(1, 'Scooty Policy number is required'),
   scooty_policy_expiry: z.string().min(1, 'Scooty Expiry date is required'),
