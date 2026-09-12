@@ -19,13 +19,14 @@ export default function PurchasesPage() {
   const [search, setSearch] = useState('');
   const [showCancelled, setShowCancelled] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
+  const [insuranceFilter, setInsuranceFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
 
   useEffect(() => {
     fetchPurchases();
-  }, [search, page, showCancelled, statusFilter]);
+  }, [search, page, showCancelled, statusFilter, insuranceFilter]);
 
   // One-time entrance for the header/filter chrome when the page first mounts.
   useEffect(() => {
@@ -35,11 +36,12 @@ export default function PurchasesPage() {
   const fetchPurchases = async () => {
     try {
       setLoading(true);
-      let query = `/api/purchases?page=${page}&limit=15`;
+      let query = `/api/purchases?page=${page}&limit=15&_t=${Date.now()}`;
       if (search) query += `&search=${encodeURIComponent(search)}`;
       if (showCancelled) query += '&status=cancelled';
       if (statusFilter === 'pending_docs') query += '&has_pending_docs=true';
       if (statusFilter === 'completed_docs') query += '&has_pending_docs=false';
+      if (insuranceFilter) query += `&insurance_status=${insuranceFilter}`;
 
       const res = await api.get(query);
       if (res.data?.success) {
@@ -191,6 +193,21 @@ export default function PurchasesPage() {
               <option value="" className="dark:bg-slate-900">All Document Statuses</option>
               <option value="pending_docs" className="dark:bg-slate-900">Pending Documents</option>
               <option value="completed_docs" className="dark:bg-slate-900">Completed Documents</option>
+            </select>
+
+            <select
+              value={insuranceFilter}
+              onChange={(e) => {
+                setInsuranceFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full sm:w-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 py-2 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-colors"
+            >
+              <option value="" className="dark:bg-slate-900">All Insurance</option>
+              <option value="scooty_expired" className="dark:bg-slate-900">Scooty Ins. Expired</option>
+              <option value="scooty_not_expired" className="dark:bg-slate-900">Scooty Ins. Not Expired</option>
+              <option value="rider_expired" className="dark:bg-slate-900">Rider Ins. Expired</option>
+              <option value="rider_not_expired" className="dark:bg-slate-900">Rider Ins. Not Expired</option>
             </select>
           </div>
         </div>

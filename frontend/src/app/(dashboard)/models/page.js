@@ -6,6 +6,7 @@ import Header from '../../../components/layout/Header';
 import Table from '../../../components/ui/Table';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
+import Select from '../../../components/ui/Select';
 import Modal from '../../../components/ui/Modal';
 import Badge from '../../../components/ui/Badge';
 import Pagination from '../../../components/ui/Pagination';
@@ -18,6 +19,7 @@ export default function ModelsPage() {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [stockStatus, setStockStatus] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -35,7 +37,7 @@ export default function ModelsPage() {
 
   useEffect(() => {
     fetchModels();
-  }, [search, page]);
+  }, [search, stockStatus, page]);
 
   // One-time entrance animation for the filter bar
   useEffect(() => {
@@ -47,6 +49,7 @@ export default function ModelsPage() {
       setLoading(true);
       let query = `/api/models?page=${page}&limit=15`;
       if (search) query += `&search=${encodeURIComponent(search)}`;
+      if (stockStatus) query += `&stockStatus=${encodeURIComponent(stockStatus)}`;
       const res = await api.get(query);
       if (res.data?.success) {
         setModels(res.data.data || []);
@@ -208,6 +211,18 @@ export default function ModelsPage() {
             placeholder="Search model name, company or ward..."
             className="w-full sm:max-w-md sm:flex-1 sm:min-w-0"
           />
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+            <Select
+              value={stockStatus}
+              onChange={(e) => { setStockStatus(e.target.value); setPage(1); }}
+              options={[
+                { value: '', label: 'All Stock Status' },
+                { value: 'in_stock', label: 'In Stock' },
+                { value: 'out_of_stock', label: 'Out of Stock' },
+              ]}
+              className="w-full sm:w-48"
+            />
+          </div>
         </div>
 
         <Table

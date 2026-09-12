@@ -114,13 +114,33 @@ CREATE TABLE IF NOT EXISTS tenants (
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   notes        TEXT,
 
+  -- Hardware
+  vehicle_number           TEXT,
+
   -- Insurance
   scooty_insurance_company TEXT,
   scooty_policy_number     TEXT,
   scooty_policy_expiry     DATE,
+  scooty_insurance_amount  NUMERIC(12,2),
+  scooty_insurance_idv     NUMERIC(12,2),
+  scooty_insurance_start   DATE,
   rider_insurance_company  TEXT,
   rider_policy_number      TEXT,
   rider_policy_expiry      DATE,
+  rider_insurance_amount   NUMERIC(12,2),
+  rider_insurance_idv      NUMERIC(12,2),
+  rider_insurance_start    DATE,
+
+  -- AMC (Annual Maintenance Contract)
+  amc_amount               NUMERIC(12,2),
+  amc_start_date           DATE,
+  amc_expire_date          DATE,
+  amc_service_log          JSONB NOT NULL DEFAULT '[]',
+  -- Each entry: { date, what_change, old_serial_no, new_serial_no, cost }
+  amc_doc_path             TEXT,
+
+  -- Buyback / Early Exit
+  buyback_amount           NUMERIC(12,2),
 
   -- Financial sanity checks
   CONSTRAINT chk_booking_lte_price
@@ -174,6 +194,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   status          TEXT NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending','converted','cancelled')),
   converted_to    UUID REFERENCES tenants(id),
+  converted_type  TEXT CHECK (converted_type IS NULL OR converted_type IN ('rental', 'direct_purchase')),
   created_by      UUID NOT NULL REFERENCES users(id),
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()

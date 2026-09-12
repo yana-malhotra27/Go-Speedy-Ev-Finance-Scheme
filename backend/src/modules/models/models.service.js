@@ -15,6 +15,12 @@ class ModelsService {
       queryBuilder = queryBuilder.or(buildSearchFilter(['name', 'company', 'ward'], query.search));
     }
 
+    if (query.stockStatus === 'in_stock') {
+      queryBuilder = queryBuilder.gt('stock_count', 0);
+    } else if (query.stockStatus === 'out_of_stock') {
+      queryBuilder = queryBuilder.eq('stock_count', 0);
+    }
+
     const { data, count, error } = await queryBuilder
       .range(offset, offset + limit - 1);
 

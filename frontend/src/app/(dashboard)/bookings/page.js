@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarCheck, Plus, ArrowRight, XCircle, AlertCircle, Edit, Phone } from 'lucide-react';
+import { CalendarCheck, Plus, ArrowRight, XCircle, AlertCircle, Edit, Phone, ChevronDown, Home, ShoppingBag } from 'lucide-react';
 import Header from '../../../components/layout/Header';
 import Table from '../../../components/ui/Table';
 import Button from '../../../components/ui/Button';
@@ -44,6 +44,7 @@ export default function BookingsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editData, setEditData] = useState({ id: '', name: '', phone: '', booking_amount: '', notes: '', modelId: '', customModel: '' });
   const [isEditing, setIsEditing] = useState(false);
+  const [showConvertMenu, setShowConvertMenu] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -207,17 +208,33 @@ export default function BookingsPage() {
         if (row.status === 'pending') {
           return (
             <div className="flex items-center gap-2">
-              <Link
-                href={`/rentals/new?booking_id=${row.id}&name=${encodeURIComponent(
-                  row.name
-                )}&phone=${encodeURIComponent(row.phone)}&model_id=${row.ev_model_id || ''}&amount=${
-                  row.booking_amount || 0
-                }`}
-              >
-                <Button variant="primary" size="sm">
-                  Convert <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <div className="relative">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setShowConvertMenu(showConvertMenu === row.id ? null : row.id)}
+                >
+                  Convert <ChevronDown className="w-3.5 h-3.5 ml-1" />
                 </Button>
-              </Link>
+                {showConvertMenu === row.id && (
+                  <div className="absolute right-0 md:left-0 top-full mt-1 w-48 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg py-1 z-10 flex flex-col">
+                    <Link
+                      href={`/rentals/new?booking_id=${row.id}&name=${encodeURIComponent(row.name)}&phone=${encodeURIComponent(row.phone)}&model_id=${row.ev_model_id || ''}&amount=${row.booking_amount || 0}`}
+                      className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
+                      onClick={() => setShowConvertMenu(null)}
+                    >
+                      <Home className="w-4 h-4 text-blue-600" /> Convert to Rental
+                    </Link>
+                    <Link
+                      href={`/purchases/new?booking_id=${row.id}&name=${encodeURIComponent(row.name)}&phone=${encodeURIComponent(row.phone)}&model_id=${row.ev_model_id || ''}&amount=${row.booking_amount || 0}`}
+                      className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
+                      onClick={() => setShowConvertMenu(null)}
+                    >
+                      <ShoppingBag className="w-4 h-4 text-emerald-600" /> Direct Purchase
+                    </Link>
+                  </div>
+                )}
+              </div>
               <Button
                 variant="outline"
                 size="sm"

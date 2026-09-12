@@ -105,7 +105,7 @@ class BookingsService {
       // 5. Update Booking Status
       await supabase
         .from('bookings')
-        .update({ status: 'converted', converted_to: tenant.id })
+        .update({ status: 'converted', converted_to: tenant.id, converted_type: tenantData.status === 'direct_purchase' ? 'direct_purchase' : 'rental' })
         .eq('id', id);
 
       return tenant;

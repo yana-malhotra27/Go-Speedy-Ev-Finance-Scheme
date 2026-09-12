@@ -200,7 +200,7 @@ function AdminDashboard() {
             </div>
             <div>
               <p className="text-sm font-bold">Issue New EV Rental</p>
-              <p className="text-xs text-blue-100">9-step fast onboarding wizard</p>
+              <p className="text-xs text-blue-100">10-step fast onboarding wizard</p>
             </div>
           </Link>
 
@@ -236,13 +236,13 @@ function AdminDashboard() {
           <div className="lg:col-span-2">
             <Card
               title="Payment Priority Alert (Overdue Tenants)"
-              subtitle="Sorted by most days overdue (₹250/day rate)"
+              subtitle="Sorted by most days overdue"
               action={
                 <Link
-                  href="/rentals?overdue_days=1"
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center"
+                  href="/rentals?tab=overdue"
+                  className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center"
                 >
-                  View All Overdue <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  View All Overdue <ArrowRight className="w-3 h-3 ml-1" />
                 </Link>
               }
             >

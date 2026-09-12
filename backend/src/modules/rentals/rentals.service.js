@@ -27,6 +27,20 @@ class RentalsService {
       queryBuilder = queryBuilder.eq('has_pending_docs', query.has_pending_docs === 'true');
     }
 
+    // Insurance status filter
+    if (query.insurance_status) {
+      const today = new Date().toISOString().split('T')[0];
+      if (query.insurance_status === 'scooty_expired') {
+        queryBuilder = queryBuilder.lt('scooty_policy_expiry', today);
+      } else if (query.insurance_status === 'scooty_not_expired') {
+        queryBuilder = queryBuilder.gte('scooty_policy_expiry', today);
+      } else if (query.insurance_status === 'rider_expired') {
+        queryBuilder = queryBuilder.lt('rider_policy_expiry', today);
+      } else if (query.insurance_status === 'rider_not_expired') {
+        queryBuilder = queryBuilder.gte('rider_policy_expiry', today);
+      }
+    }
+
     const { data: tenants, count, error } = await queryBuilder
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -99,6 +113,18 @@ class RentalsService {
       }
     });
 
+    const requiredFields = [
+      'vehicle_number',
+      'scooty_insurance_amount', 'scooty_insurance_idv', 'scooty_insurance_start',
+      'rider_insurance_amount', 'rider_insurance_idv', 'rider_insurance_start',
+      'buyback_amount',
+    ];
+    for (const field of requiredFields) {
+      if (!tenantData[field] && tenantData[field] !== 0) {
+        throw new Error(`Field ${field} is required`);
+      }
+    }
+
     // Prevent new rental if an active one exists for this phone
     if (tenantData.phone) {
       const { data: existingActive } = await supabase
@@ -146,7 +172,7 @@ class RentalsService {
       tenantData.downpayment_paid = tenantData.downpayment_paid ?? 0;
       tenantData.booking_amount = tenantData.booking_amount ?? 0;
     } else {
-      tenantData.installment_daily_rate = tenantData.installment_daily_rate ?? 250;
+      tenantData.installment_daily_rate = tenantData.installment_daily_rate ?? 0;
       tenantData.installment_frequency = tenantData.installment_frequency || 'daily';
     }
 
@@ -223,8 +249,8 @@ class RentalsService {
 
     if (fetchError) throw fetchError;
     if (tenant.status === 'cancelled') throw new Error('This contract is already cancelled');
-    if (tenant.status !== 'rented' && tenant.status !== 'direct_purchase') {
-      throw new Error('Only active rentals or direct purchases can be cancelled');
+    if (tenant.status !== 'rented' && tenant.status !== 'direct_purchase' && tenant.status !== 'completed') {
+      throw new Error('Only active rentals, direct purchases, or completed purchases can be cancelled');
     }
 
     // 1. Update status
@@ -277,13 +303,14 @@ class RentalsService {
   }
 
   async checkUniqueHardwareOrPolicy(fields) {
-    const { chassis_no, motor_ctrl_no, battery_no, scooty_policy_number, rider_policy_number } = fields;
+    const { chassis_no, motor_ctrl_no, battery_no, vehicle_number, scooty_policy_number, rider_policy_number } = fields;
     
     // We only need to check fields that were actually provided
     const orConditions = [];
     if (chassis_no) orConditions.push(`chassis_no.eq.${chassis_no}`);
     if (motor_ctrl_no) orConditions.push(`motor_ctrl_no.eq.${motor_ctrl_no}`);
     if (battery_no) orConditions.push(`battery_no.eq.${battery_no}`);
+    if (vehicle_number) orConditions.push(`vehicle_number.eq.${vehicle_number}`);
     if (scooty_policy_number) orConditions.push(`scooty_policy_number.eq.${scooty_policy_number}`);
     if (rider_policy_number) orConditions.push(`rider_policy_number.eq.${rider_policy_number}`);
 
@@ -293,7 +320,7 @@ class RentalsService {
 
     const { data, error } = await supabase
       .from('tenants')
-      .select('chassis_no, motor_ctrl_no, battery_no, scooty_policy_number, rider_policy_number')
+      .select('chassis_no, motor_ctrl_no, battery_no, vehicle_number, scooty_policy_number, rider_policy_number')
       .or(orConditions.join(','));
 
     if (error) throw error;
@@ -304,6 +331,7 @@ class RentalsService {
       if (chassis_no && conflict.chassis_no === chassis_no) return { exists: true, message: 'Chassis number already exists in the system.' };
       if (motor_ctrl_no && conflict.motor_ctrl_no === motor_ctrl_no) return { exists: true, message: 'Motor controller number already exists in the system.' };
       if (battery_no && conflict.battery_no === battery_no) return { exists: true, message: 'Battery serial number already exists in the system.' };
+      if (vehicle_number && conflict.vehicle_number === vehicle_number) return { exists: true, message: 'Vehicle number already exists in the system.' };
       if (scooty_policy_number && conflict.scooty_policy_number === scooty_policy_number) return { exists: true, message: 'Scooty policy number already exists in the system.' };
       if (rider_policy_number && conflict.rider_policy_number === rider_policy_number) return { exists: true, message: 'Rider policy number already exists in the system.' };
       

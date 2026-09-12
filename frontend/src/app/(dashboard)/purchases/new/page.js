@@ -12,11 +12,13 @@ import {
   ShieldAlert,
   ShieldCheck,
   Calendar,
-  ChevronRight,
   ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   AlertTriangle,
   RotateCcw,
+  Wrench,
+  Trash2,
 } from 'lucide-react';
 import Header from '../../../../components/layout/Header';
 import Card from '../../../../components/ui/Card';
@@ -43,6 +45,8 @@ const ALL_STEPS = [
   { id: 3, name: 'Documents', icon: FileText },
   { id: 4, name: 'Scooty HW', icon: Cpu },
   { id: 5, name: 'Insurance', icon: ShieldCheck },
+  { id: 6, name: 'Downpayment', icon: IndianRupee },
+  { id: 7, name: 'AMC', icon: Wrench },
 ];
 
 export default function NewPurchaseWizardPage() {
@@ -53,6 +57,7 @@ export default function NewPurchaseWizardPage() {
   const [models, setModels] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
 
   // Pending Docs Confirmation Modal
   const [isPendingDocsModalOpen, setIsPendingDocsModalOpen] = useState(false);
@@ -82,28 +87,54 @@ export default function NewPurchaseWizardPage() {
     invoice_doc_path: '',
     scooty_insurance_path: '',
     rider_insurance_path: '',
-    scooty_insurance_company: '',
-    scooty_policy_number: '',
-    scooty_policy_expiry: '',
-    rider_insurance_company: '',
-    rider_policy_number: '',
-    rider_policy_expiry: '',
+    amc_doc_path: '',
 
     // Step 4: Scooty Hardware
     chassis_no: '',
     motor_ctrl_no: '',
     battery_no: '',
+    vehicle_number: '',
     rto_type: 'rto',
     hp_financer: 'go_speedy',
     hp_financer_other: '',
     date_of_purchase: new Date().toISOString().split('T')[0],
     date_of_delivery: new Date().toISOString().split('T')[0],
 
+    // Step 5: Insurance
+    scooty_insurance_company: '',
+    scooty_policy_number: '',
+    scooty_policy_expiry: '',
+    scooty_insurance_amount: '',
+    scooty_insurance_idv: '',
+    scooty_insurance_start: '',
+    rider_insurance_company: '',
+    rider_policy_number: '',
+    rider_policy_expiry: '',
+    rider_insurance_amount: '',
+    rider_insurance_idv: '',
+    rider_insurance_start: '',
+    notes: '',
 
+    // Step 6: Financial & Downpayment
+    booking_amount: Number(searchParams.get('amount') || 0),
+    downpayment_paid: 10000,
+    downpayment_mode: 'cash',
+    dp_by_other: false,
+    dp_other_name: '',
+    dp_other_phone: '',
+    buyback_amount: '',
+
+    // Step 7: AMC
+    amc_amount: '',
+    amc_start_date: '',
+    amc_expire_date: '',
+    amc_service_log: [],
 
     // Optional booking linkage
     booking_id: searchParams.get('booking_id') || '',
   });
+
+  const selectedModel = models.find((m) => m.id === formData.ev_model_id);
 
   // Load models & draft
   useEffect(() => {
@@ -172,18 +203,27 @@ export default function NewPurchaseWizardPage() {
       }
     }
     if (step === 4) {
-      if (!formData.chassis_no.trim() || !formData.motor_ctrl_no.trim() || !formData.battery_no.trim() || !formData.rto_type || !formData.hp_financer || !formData.date_of_purchase || !formData.date_of_delivery) {
+      if (!formData.vehicle_number?.trim() || !formData.chassis_no.trim() || !formData.motor_ctrl_no.trim() || !formData.battery_no.trim() || !formData.rto_type || !formData.hp_financer || !formData.date_of_purchase || !formData.date_of_delivery) {
         setErrorMessage('All hardware and registration details are required');
         return false;
       }
     }
     if (step === 5) {
-      if (!formData.scooty_insurance_company.trim() || !formData.scooty_policy_number.trim() || !formData.scooty_policy_expiry) {
-        setErrorMessage('All Scooty insurance details are required');
+      if (!formData.scooty_insurance_company.trim() || !formData.scooty_policy_number.trim() || !formData.scooty_policy_expiry || !formData.scooty_insurance_amount || !formData.scooty_insurance_idv || !formData.scooty_insurance_start ||
+          !formData.rider_insurance_company.trim() || !formData.rider_policy_number.trim() || !formData.rider_policy_expiry || !formData.rider_insurance_amount || !formData.rider_insurance_idv || !formData.rider_insurance_start) {
+        setErrorMessage('All insurance details are required');
         return false;
       }
-      if (!formData.rider_insurance_company.trim() || !formData.rider_policy_number.trim() || !formData.rider_policy_expiry) {
-        setErrorMessage('All Rider insurance details are required');
+    }
+    if (step === 6) {
+      if (formData.booking_amount === '' || formData.downpayment_paid === '' || !formData.downpayment_mode || formData.buyback_amount === '') {
+        setErrorMessage('All downpayment and financial details are required');
+        return false;
+      }
+    }
+    if (step === 7) {
+      if (formData.amc_amount === '' || formData.amc_start_date === '' || formData.amc_expire_date === '') {
+        setErrorMessage('AMC amount and dates are required');
         return false;
       }
     }
@@ -196,7 +236,7 @@ export default function NewPurchaseWizardPage() {
     if (currentStep === 4) {
       try {
         setIsSubmitting(true);
-        const res = await api.get(`/api/rentals/check-uniqueness?chassis_no=${encodeURIComponent(formData.chassis_no)}&motor_ctrl_no=${encodeURIComponent(formData.motor_ctrl_no)}&battery_no=${encodeURIComponent(formData.battery_no)}`);
+        const res = await api.get(`/api/rentals/check-uniqueness?chassis_no=${encodeURIComponent(formData.chassis_no)}&motor_ctrl_no=${encodeURIComponent(formData.motor_ctrl_no)}&battery_no=${encodeURIComponent(formData.battery_no)}&vehicle_number=${encodeURIComponent(formData.vehicle_number || '')}`);
         if (res.data?.success && res.data.data?.exists) {
           setErrorMessage(res.data.data.message);
           return;
@@ -280,8 +320,6 @@ export default function NewPurchaseWizardPage() {
         ...restFormData,
         hp_financer: formData.hp_financer === 'other' ? (hp_financer_other || 'Other') : formData.hp_financer,
         has_pending_docs: hasPendingDocs,
-        booking_amount: 0,
-        downpayment_paid: 0,
         installment_daily_rate: 0,
         total_months: 0,
         status: 'direct_purchase',
@@ -557,6 +595,12 @@ export default function NewPurchaseWizardPage() {
                   currentPath={formData.rider_insurance_path}
                   onUploaded={(path) => updateField('rider_insurance_path', path)}
                 />
+                <FileUpload
+                  label="AMC Document"
+                  docType="amc_doc_path"
+                  currentPath={formData.amc_doc_path}
+                  onUploaded={(path) => updateField('amc_doc_path', path)}
+                />
               </div>
             </div>
           )}
@@ -570,7 +614,15 @@ export default function NewPurchaseWizardPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Vehicle Registration Number"
+                  placeholder="e.g. DL-01EV-1234"
+                  value={formData.vehicle_number}
+                  onChange={(e) => updateField('vehicle_number', e.target.value)}
+                  required
+                />
+
                 <Input
                   label="Chassis Number"
                   placeholder="e.g. CHSS-882190"
@@ -670,6 +722,27 @@ export default function NewPurchaseWizardPage() {
                     required
                   />
                   <Input
+                    label="Amount (₹)"
+                    type="number"
+                    value={formData.scooty_insurance_amount}
+                    onChange={(e) => updateField('scooty_insurance_amount', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="IDV (₹)"
+                    type="number"
+                    value={formData.scooty_insurance_idv}
+                    onChange={(e) => updateField('scooty_insurance_idv', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Start Date"
+                    type="date"
+                    value={formData.scooty_insurance_start}
+                    onChange={(e) => updateField('scooty_insurance_start', e.target.value)}
+                    required
+                  />
+                  <Input
                     label="Expiry Date"
                     type="date"
                     value={formData.scooty_policy_expiry}
@@ -699,6 +772,27 @@ export default function NewPurchaseWizardPage() {
                     required
                   />
                   <Input
+                    label="Amount (₹)"
+                    type="number"
+                    value={formData.rider_insurance_amount}
+                    onChange={(e) => updateField('rider_insurance_amount', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="IDV (₹)"
+                    type="number"
+                    value={formData.rider_insurance_idv}
+                    onChange={(e) => updateField('rider_insurance_idv', e.target.value)}
+                    required
+                  />
+                  <Input
+                    label="Start Date"
+                    type="date"
+                    value={formData.rider_insurance_start}
+                    onChange={(e) => updateField('rider_insurance_start', e.target.value)}
+                    required
+                  />
+                  <Input
                     label="Expiry Date"
                     type="date"
                     value={formData.rider_policy_expiry}
@@ -710,9 +804,231 @@ export default function NewPurchaseWizardPage() {
             </div>
           )}
 
+          {/* STEP 6: DOWNPAYMENT */}
+          {currentStep === 6 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Financial Breakdown & Downpayment</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Booking deduction and day-1 initial payment
+                </p>
+              </div>
 
+              {selectedModel && (
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-white/10 grid grid-cols-4 gap-4 text-center">
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Sticker Price</span>
+                    <p className="text-base font-black text-slate-900 dark:text-white">{formatCurrency(selectedModel.total_price)}</p>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Booking Token</span>
+                    <p className="text-base font-black text-emerald-600">-{formatCurrency(formData.booking_amount)}</p>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Downpayment</span>
+                    <p className="text-base font-black text-emerald-600">-{formatCurrency(formData.downpayment_paid)}</p>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">Balance to Pay</span>
+                    <p className="text-base font-black text-blue-600">
+                      {formatCurrency(selectedModel.total_price - Number(formData.booking_amount || 0) - Number(formData.downpayment_paid || 0))}
+                    </p>
+                  </div>
+                </div>
+              )}
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Booking Token Amount (₹)"
+                  type="number"
+                  value={formData.booking_amount}
+                  onChange={(e) => updateField('booking_amount', e.target.value)}
+                  required
+                />
 
+                <Input
+                  label="Downpayment Paid on Delivery (₹)"
+                  type="number"
+                  value={formData.downpayment_paid}
+                  onChange={(e) => updateField('downpayment_paid', e.target.value)}
+                  required
+                />
+
+                <Select
+                  label="Downpayment Mode"
+                  value={formData.downpayment_mode}
+                  onChange={(e) => updateField('downpayment_mode', e.target.value)}
+                  options={DOWNPAYMENT_MODES}
+                  required
+                />
+
+                <Input
+                  label="Buyback / Early Exit Fee (₹)"
+                  type="number"
+                  value={formData.buyback_amount}
+                  onChange={(e) => updateField('buyback_amount', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.dp_by_other}
+                    onChange={(e) => updateField('dp_by_other', e.target.checked)}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Downpayment paid by another person (sponsor / relative)</span>
+                </label>
+
+                {formData.dp_by_other && (
+                  <div className="grid grid-cols-2 gap-4 mt-3">
+                    <Input
+                      label="Sponsor Full Name"
+                      placeholder="Name"
+                      value={formData.dp_other_name}
+                      onChange={(e) => updateField('dp_other_name', e.target.value)}
+                    />
+                    <Input
+                      label="Sponsor Mobile Phone"
+                      placeholder="Phone"
+                      value={formData.dp_other_phone}
+                      onChange={(e) => updateField('dp_other_phone', e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 7: AMC */}
+          {currentStep === 7 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Annual Maintenance Contract (AMC)</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Set up AMC details for this vehicle
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Input
+                  label="AMC Amount (₹)"
+                  type="number"
+                  value={formData.amc_amount}
+                  onChange={(e) => updateField('amc_amount', e.target.value)}
+                  required
+                />
+                <Input
+                  label="AMC Start Date"
+                  type="date"
+                  value={formData.amc_start_date}
+                  onChange={(e) => updateField('amc_start_date', e.target.value)}
+                  required
+                />
+                <Input
+                  label="AMC Expire Date"
+                  type="date"
+                  value={formData.amc_expire_date}
+                  onChange={(e) => updateField('amc_expire_date', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-white">AMC Service Log</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      updateField('amc_service_log', [
+                        ...formData.amc_service_log,
+                        { date: new Date().toISOString().split('T')[0], what_change: '', old_serial_no: '', new_serial_no: '', cost: '' }
+                      ]);
+                    }}
+                  >
+                    Add Service Row
+                  </Button>
+                </div>
+                
+                {formData.amc_service_log.length === 0 ? (
+                  <p className="text-xs text-slate-500 text-center py-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">No service records yet. Click add to create one.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {formData.amc_service_log.map((log, idx) => (
+                      <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-5 gap-3 relative group">
+                        <Input
+                          label="Date"
+                          type="date"
+                          value={log.date}
+                          onChange={(e) => {
+                            const newLog = [...formData.amc_service_log];
+                            newLog[idx].date = e.target.value;
+                            updateField('amc_service_log', newLog);
+                          }}
+                        />
+                        <Input
+                          label="What Changed"
+                          placeholder="e.g. Battery Replaced"
+                          value={log.what_change}
+                          onChange={(e) => {
+                            const newLog = [...formData.amc_service_log];
+                            newLog[idx].what_change = e.target.value;
+                            updateField('amc_service_log', newLog);
+                          }}
+                        />
+                        <Input
+                          label="Old Serial No."
+                          placeholder="Old SN"
+                          value={log.old_serial_no}
+                          onChange={(e) => {
+                            const newLog = [...formData.amc_service_log];
+                            newLog[idx].old_serial_no = e.target.value;
+                            updateField('amc_service_log', newLog);
+                          }}
+                        />
+                        <Input
+                          label="New Serial No."
+                          placeholder="New SN"
+                          value={log.new_serial_no}
+                          onChange={(e) => {
+                            const newLog = [...formData.amc_service_log];
+                            newLog[idx].new_serial_no = e.target.value;
+                            updateField('amc_service_log', newLog);
+                          }}
+                        />
+                        <Input
+                          label="Cost (₹)"
+                          type="number"
+                          placeholder="0"
+                          value={log.cost}
+                          onChange={(e) => {
+                            const newLog = [...formData.amc_service_log];
+                            newLog[idx].cost = e.target.value;
+                            updateField('amc_service_log', newLog);
+                          }}
+                        />
+                        
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newLog = [...formData.amc_service_log];
+                            newLog.splice(idx, 1);
+                            updateField('amc_service_log', newLog);
+                          }}
+                          className="absolute -top-2 -right-2 bg-white dark:bg-slate-700 text-rose-500 rounded-full p-1 border border-slate-200 dark:border-slate-600 shadow-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Wizard Footer Controls */}
           <div className="flex items-center justify-between border-t border-slate-100 pt-5 mt-6">

@@ -25,6 +25,20 @@ class PurchasesService {
       queryBuilder = queryBuilder.eq('has_pending_docs', query.has_pending_docs === 'true');
     }
 
+    // Insurance status filter
+    if (query.insurance_status) {
+      const today = new Date().toISOString().split('T')[0];
+      if (query.insurance_status === 'scooty_expired') {
+        queryBuilder = queryBuilder.lt('scooty_policy_expiry', today);
+      } else if (query.insurance_status === 'scooty_not_expired') {
+        queryBuilder = queryBuilder.gte('scooty_policy_expiry', today);
+      } else if (query.insurance_status === 'rider_expired') {
+        queryBuilder = queryBuilder.lt('rider_policy_expiry', today);
+      } else if (query.insurance_status === 'rider_not_expired') {
+        queryBuilder = queryBuilder.gte('rider_policy_expiry', today);
+      }
+    }
+
     const { data, count, error } = await queryBuilder
       .order('updated_at', { ascending: false })
       .range(offset, offset + limit - 1);

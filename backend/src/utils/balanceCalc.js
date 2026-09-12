@@ -16,7 +16,7 @@ function calcBalance(tenant, totalPaid = 0) {
   const outstanding = Math.max(0, installmentTotal - totalPaid);
   const overpaid = Math.max(0, totalPaid - installmentTotal);
   
-  const dailyRate = tenant.installment_daily_rate ? Number(tenant.installment_daily_rate) : 250;
+  const dailyRate = tenant.installment_daily_rate ? Number(tenant.installment_daily_rate) : 0;
   const frequency = tenant.installment_frequency || 'daily';
   
   // Calculate how much should have been collected by today
