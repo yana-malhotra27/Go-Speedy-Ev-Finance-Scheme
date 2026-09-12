@@ -1079,7 +1079,7 @@ export default function TenantDetailPage() {
                         className="text-[10px] font-bold text-blue-600 hover:text-blue-800"
                         onClick={() => {
                           const logs = [...(editData.amc_service_log || [])];
-                          logs.push({ what_change: '', old_serial_no: '', new_serial_no: '', cost: '' });
+                          logs.push({ date: new Date().toISOString().split('T')[0], what_change: '', old_serial_no: '', new_serial_no: '', cost: '' });
                           setEditData({ ...editData, amc_service_log: logs });
                         }}
                       >
@@ -1094,6 +1094,7 @@ export default function TenantDetailPage() {
                         <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
                           <thead className="bg-slate-50 dark:bg-slate-800/80 uppercase font-semibold text-[10px] text-slate-500">
                             <tr>
+                              <th className="px-3 py-2">Date</th>
                               <th className="px-3 py-2">What Changed</th>
                               <th className="px-3 py-2">Old Serial #</th>
                               <th className="px-3 py-2">New Serial #</th>
@@ -1104,6 +1105,9 @@ export default function TenantDetailPage() {
                           <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                             {editData.amc_service_log.map((log, i) => (
                               <tr key={i} className="bg-white dark:bg-slate-900/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                                <td className="px-3 py-2">
+                                  <input type="date" className="w-full bg-transparent border border-slate-200 dark:border-white/10 rounded px-2 py-1 focus:outline-none focus:border-blue-500" value={log.date || ''} onChange={(e) => { const logs = [...editData.amc_service_log]; logs[i].date = e.target.value; setEditData({ ...editData, amc_service_log: logs }); }} />
+                                </td>
                                 <td className="px-3 py-2">
                                   <input type="text" className="w-full bg-transparent border border-slate-200 dark:border-white/10 rounded px-2 py-1 focus:outline-none focus:border-blue-500" value={log.what_change || ''} onChange={(e) => { const logs = [...editData.amc_service_log]; logs[i].what_change = e.target.value; setEditData({ ...editData, amc_service_log: logs }); }} placeholder="e.g. Battery" />
                                 </td>
@@ -1133,6 +1137,7 @@ export default function TenantDetailPage() {
                         <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
                           <thead className="bg-slate-50 dark:bg-slate-800/80 uppercase font-semibold text-[10px] text-slate-500">
                             <tr>
+                              <th className="px-3 py-2">Date</th>
                               <th className="px-3 py-2">What Changed</th>
                               <th className="px-3 py-2">Old Serial #</th>
                               <th className="px-3 py-2">New Serial #</th>
@@ -1142,6 +1147,7 @@ export default function TenantDetailPage() {
                           <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                             {tenant.amc_service_log.map((log, i) => (
                               <tr key={i} className="bg-white dark:bg-slate-900/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                                <td className="px-3 py-2">{log.date || '—'}</td>
                                 <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{log.what_change || '—'}</td>
                                 <td className="px-3 py-2">{log.old_serial_no || '—'}</td>
                                 <td className="px-3 py-2">{log.new_serial_no || '—'}</td>
