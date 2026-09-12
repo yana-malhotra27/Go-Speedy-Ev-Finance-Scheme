@@ -140,7 +140,7 @@ export default function NewRentalWizardPage() {
     ],
 
     // Step 9: Installments & Timeline
-    installment_daily_rate: '',
+    installment_daily_rate: '250',
     installment_frequency: 'daily',
     installment_by_self: true,
     installment_other_name: '',
