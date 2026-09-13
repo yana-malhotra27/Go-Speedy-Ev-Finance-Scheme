@@ -343,7 +343,7 @@ export default function ModelsPage() {
         title={editingModelId ? "Edit EV Model" : "Register New EV Model"}
         subtitle={editingModelId ? "Update existing model details" : "Add a new electric scooter model to available fleet inventory"}
       >
-        <form onSubmit={handleSubmitModel} className="space-y-4" autoComplete="off">
+        <form onSubmit={handleSubmitModel} className="space-y-4" autoComplete="nope">
           {error && (
             <div className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -436,7 +436,7 @@ export default function ModelsPage() {
         title={`Add Stock to ${selectedModel?.name}`}
         subtitle="Log new incoming stock for this EV model"
       >
-        <form onSubmit={handleStockSubmit} className="space-y-4" autoComplete="off">
+        <form onSubmit={handleStockSubmit} className="space-y-4" autoComplete="nope">
           <Input
             label="Date Received"
             type="date"

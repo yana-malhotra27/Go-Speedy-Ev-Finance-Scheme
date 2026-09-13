@@ -436,7 +436,7 @@ export default function ModelViewPage({ params }) {
         title={`Add Stock to ${model?.name}`}
         subtitle="Log new incoming stock for this EV model"
       >
-        <form onSubmit={handleStockSubmit} className="space-y-4" autoComplete="off">
+        <form onSubmit={handleStockSubmit} className="space-y-4" autoComplete="nope">
           <Input
             label="Date Received"
             type="date"
