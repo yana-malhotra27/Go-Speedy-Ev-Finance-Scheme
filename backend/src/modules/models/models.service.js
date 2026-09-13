@@ -74,8 +74,8 @@ class ModelsService {
   }
 
   async updateModel(id, updates) {
-    // If trying to change price or deactivate, check for active rentals
-    if (updates.total_price !== undefined || updates.is_active === false) {
+    // If trying to change price, check for active rentals
+    if (updates.total_price !== undefined) {
       const { count, error: countError } = await supabase
         .from('tenants')
         .select('*', { count: 'exact', head: true })
@@ -85,12 +85,7 @@ class ModelsService {
       if (countError) throw countError;
 
       if (count > 0) {
-        if (updates.total_price !== undefined) {
-          throw new Error(`Cannot change price: there are ${count} active rentals using this model`);
-        }
-        if (updates.is_active === false) {
-          throw new Error(`Cannot deactivate: there are ${count} active rentals using this model`);
-        }
+        throw new Error(`Cannot change price: there are ${count} active rentals using this model`);
       }
     }
 
