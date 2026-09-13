@@ -403,7 +403,7 @@ export default function StaffPage() {
         title="Register New Staff Member"
         subtitle="Create an operator account for Delhi hub collections and registrations"
       >
-        <form onSubmit={handleCreateStaff} className="space-y-4" autoComplete="nope">
+        <form onSubmit={handleCreateStaff} className="space-y-4" autoComplete="off">
           {error && (
             <div className="rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 p-3 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -487,7 +487,7 @@ export default function StaffPage() {
         title={`Edit ${editingStaff?.name || 'Staff Member'}`}
         subtitle="Update contact details or change their system role"
       >
-        <form onSubmit={handleUpdateStaff} className="space-y-4" autoComplete="nope">
+        <form onSubmit={handleUpdateStaff} className="space-y-4" autoComplete="off">
           {editError && (
             <div className="rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 p-3 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -570,7 +570,7 @@ export default function StaffPage() {
         title={`Reset Password for ${passwordModalUser?.name}`}
         subtitle="Assign a new secure login password"
       >
-        <form onSubmit={handleResetPassword} className="space-y-4" autoComplete="nope">
+        <form onSubmit={handleResetPassword} className="space-y-4" autoComplete="off">
           {resetError && (
             <div className="rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 p-3 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
